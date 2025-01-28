@@ -963,8 +963,10 @@ function git-branch-backup-modified-untrack-files() {
     DEST_DIR="../$( basename $PWD )_bkup_${YMD_HMS}"
     for i in $MODIFIED_UNTRACK_LIST
     do
-        git-branch-private-backup-upper-dir "$i" "$DEST_DIR"
-        RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
+        if [ -f "$i" ] ; then
+            git-branch-private-backup-upper-dir "$i" "$DEST_DIR"
+            RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
+        fi
     done
 }
 
