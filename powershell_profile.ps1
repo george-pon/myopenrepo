@@ -103,6 +103,8 @@ function f-git-bash {
     Write-Output "Language=ja" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "ForegroundColour=255,255,255" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "CopyAsRTF=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Locale=ja_JP" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Charset=UTF-8" | Add-Content -Encoding UTF8 "${mintty_config_file}"
 
     if ( $args.Length -eq 0 ) {
         & "C:/Program Files/Git/usr/bin/mintty.exe" --config "${mintty_config_file}" "--exec" "/usr/bin/bash"  "--login" "-i"
@@ -228,14 +230,21 @@ function f-msys-bash {
     Write-Output "ForegroundColour=255,255,255" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "CopyAsRTF=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
 
+    if ( Test-Path "C:/tools/msys64/usr/bin/mintty.exe" ) {
+        $MSYS_MINTTY = "C:/tools/msys64/usr/bin/mintty.exe"
+    }
+    if ( Test-Path "C:/msys64/usr/bin/mintty.exe" ) {
+        $MSYS_MINTTY = "C:/msys64/usr/bin/mintty.exe"
+    }
+
     $old_lang = "$env:LANG"
     $env:LANG = "ja_JP.UTF-8"
     if ( $args.Length -eq 0 ) {
-        & "C:/tools/msys64/usr/bin/mintty.exe" --config "${mintty_config_file}" "--exec"  "/usr/bin/bash" "--login" "-i"
+        & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"  "/usr/bin/bash" "--login" "-i"
     }
     else {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --config "${mintty_config_file}"  "/usr/bin/bash"  "--login"  "-c"  "$args"
-        & "C:/tools/msys64/usr/bin/mintty.exe" --config "${mintty_config_file}"  "/usr/bin/bash"  "--login"  "-c"  "$args"
+        & $MSYS_MINTTY --config "${mintty_config_file}"  "/usr/bin/bash"  "--login"  "-c"  "$args"
     }
     $env:LANG = $old_lang
 }
@@ -270,15 +279,22 @@ function f-msys-bash-sjis {
     Write-Output "Locale=ja_JP" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Charset=SJIS" | Add-Content -Encoding UTF8 "${mintty_config_file}"
 
+    if ( Test-Path "C:/tools/msys64/usr/bin/mintty.exe" ) {
+        $MSYS_MINTTY = "C:/tools/msys64/usr/bin/mintty.exe"
+    }
+    if ( Test-Path "C:/msys64/usr/bin/mintty.exe" ) {
+        $MSYS_MINTTY = "C:/msys64/usr/bin/mintty.exe"
+    }
+
     $old_lang = "$env:LANG"
     $env:LANG = "ja_JP.SJIS"
     if ( $args.Length -eq 0 ) {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash" --login
-        & "C:/tools/msys64/usr/bin/mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash" --login
+        & $MSYS_MINTTY --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash" --login
     }
     else {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash"  --login -c  "$args"
-        & "C:/tools/msys64/usr/bin/mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash"  --login -c  "$args"
+        & $MSYS_MINTTY --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash"  --login -c  "$args"
     }
     $env:LANG = $old_lang
 }
@@ -297,17 +313,28 @@ function f-msys-bash-here {
     #f-path-remove "C:\Program Files\Git\usr\bin"
     #f-path-remove "C:\Program Files\Git\bin"
 
-    # prepend MSYS2 PATH
-    f-path-prepend "C:\tools\msys64\bin"
-    f-path-prepend "C:\tools\msys64\usr\bin"
-    f-path-prepend "C:\tools\msys64\usr\local\bin"
-    f-path-prepend "C:\tools\msys64\mingw64\bin"
+    if ( Test-Path "C:\tools\msys64\usr\bin\bash.exe" ) {
+        # prepend MSYS2 PATH
+        f-path-prepend "C:\tools\msys64\bin"
+        f-path-prepend "C:\tools\msys64\usr\bin"
+        f-path-prepend "C:\tools\msys64\usr\local\bin"
+        f-path-prepend "C:\tools\msys64\mingw64\bin"
+        $MSYS_BASH = "C:\tools\msys64\usr\bin\bash.exe"
+    }
+    if ( Test-Path "C:\msys64\usr\bin\bash.exe" ) {
+        # prepend MSYS2 PATH
+        f-path-prepend "C:\msys64\bin"
+        f-path-prepend "C:\msys64\usr\bin"
+        f-path-prepend "C:\msys64\usr\local\bin"
+        f-path-prepend "C:\msys64\mingw64\bin"
+        $MSYS_BASH = "C:\msys64\usr\bin\bash.exe"
+    }
 
     if ( $args.Length -eq 0 ) {
-        & "C:\tools\msys64\usr\bin\bash" --login
+        & $MSYS_BASH
     }
     else {
-        & "C:\tools\msys64\usr\bin\bash" -c "$args"
+        & $MSYS_BASH -c "$args"
     }
 }
 
