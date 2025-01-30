@@ -64,8 +64,36 @@
 (line-number-mode t)
 
 ;; set scroll line to 1
-(setq scroll-step 1)
+(setq scroll-step 2)
 
 ;; display time into mode line
 (display-time)
+
+;;
+;; eww setting
+;;
+
+;; 開始サイト
+;; google に変更
+;; (setq eww-search-prefix "https://www.google.co.jp/search?q=")
+
+;;
+;; ewwのテキストの色設定を無効にする。黒背景だとgoogle検索の文字が見えないので。
+;;
+(defvar eww-disable-colorize t)
+(defun shr-colorize-region--disable (orig start end fg &optional bg &rest _)
+  (unless eww-disable-colorize
+    (funcall orig start end fg)))
+(advice-add 'shr-colorize-region :around 'shr-colorize-region--disable)
+(advice-add 'eww-colorize-region :around 'shr-colorize-region--disable)
+(defun eww-disable-color ()
+  "eww で文字色を反映させない"
+  (interactive)
+  (setq-local eww-disable-colorize t)
+  (eww-reload))
+(defun eww-enable-color ()
+  "eww で文字色を反映させる"
+  (interactive)
+  (setq-local eww-disable-colorize nil)
+  (eww-reload))
 
