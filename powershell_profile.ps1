@@ -2,6 +2,10 @@
 # powershell 便利関数
 #
 
+#
+# 共通部
+#
+
 function f-getcwd {
     # スクリプトの実行位置を取得。
     $result = $PSScriptRoot
@@ -173,7 +177,7 @@ function f-sudo-git-bash {
 # MSYS2がインストールされていると結局MSYS2の環境が使われる...。
 function f-git-bash-here {
     if ( $args.Length -eq 0 ) {
-        & "C:\Program Files\Git\bin\bash.exe"
+        & "C:\Program Files\Git\bin\bash.exe" --login
     }
     else {
         & "C:\Program Files\Git\bin\bash.exe" -c "$args"
@@ -331,7 +335,7 @@ function f-msys-bash-here {
     }
 
     if ( $args.Length -eq 0 ) {
-        & $MSYS_BASH
+        & $MSYS_BASH --login
     }
     else {
         & $MSYS_BASH -c "$args"
@@ -1141,40 +1145,9 @@ function f-event-log {
     Get-EventLog "Windows PowerShell" -newest 15
 }
 
-
-#
-# Javaの環境設定
-#
-function f-java-setup {
-    $dir_list = @( "C:\Program Files\OpenJDK\jdk-13.0.2" )
-    # $dir_list = @( "C:\Program Files\OpenJDK\jdk-12.0.2" )
-    $dir_list += Get-ChildItem "C:\Program Files\OpenJDK" | foreach-object { $_.FullName } | Sort-Object -Descending
-    foreach ( $i in $dir_list ) {
-        if ( Test-Path "$i/bin" ) {
-            $env:JAVA_HOME = "$i"
-            f-path-remove "$i/bin"
-            f-path-prepend "$i/bin"
-            Write-Output "set JAVA_HOME to $env:JAVA_HOME"
-            break
-        }
-    }
-}
-
-#
-# python の venv の初期化
-#
-function f-python-venv {
-    if ( Test-Path "./venv/Scripts/Activate.ps1" ) {
-        . ./venv/Scripts/Activate.ps1
-    }
-    f-type python
-}
-
-
 function f-cat-hosts {
     Get-Content "c:\Windows\System32\drivers\etc\hosts"
 }
-
 
 function f-invoke-webrequest {
     # キャッシュ付き invoke webrequest
@@ -1268,6 +1241,27 @@ function f-invoke-webrequest {
     Copy-Item "$outfile" "$cache_file_name"
 }
 
+function f-winget-upgrade-all {
+    winget upgrade --all
+}
+
+#
+# python の venv の初期化
+#
+function f-python-venv {
+    if ( Test-Path "./venv/Scripts/Activate.ps1" ) {
+        . ./venv/Scripts/Activate.ps1
+    }
+    f-type python
+}
+
+
+
+
+#----------------------------------------------------------------------
+# 環境依存部
+#
+
 
 #-----------------------------------------------------
 # 登録ディレクトリ
@@ -1290,9 +1284,6 @@ function cdappdata {
 
 
 
-function f-winget-upgrade-all {
-    winget upgrade --all
-}
 
 #
 # end of file
