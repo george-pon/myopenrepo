@@ -1,0 +1,120 @@
+#!/bin/bash
+#
+#  ~/.bashrcの設定サンプル(UTF-8)(LF)
+#
+
+# プロンプト
+PS1='MSYS2 \u@\h \w $ '
+
+
+# 環境変数DISPLAYを適当に設定する
+if [ -z "$DISPLAY" ] ; then
+    hostname=$( hostname )
+    DISPLAY=${hostname}:0.0
+    export DISPLAY
+fi
+
+# 言語
+if [ -z "$LANG" ] ; then
+    LANG=ja_JP.UTF-8
+    export LANG
+fi
+
+# TERM
+export TERM=xterm-256color
+
+# JAVA_HOME
+if [ -d "/c/Program Files/OpenJDK/jdk-14.0.1" ]; then
+    export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.1"
+fi
+
+# GITのベースディレクトリ
+GIT_BASE_DIR=/c/HOME/git
+export GIT_BASE_DIR
+
+# GITのオレ専用ベースディレクトリ
+GIT_MY_DIR=$GIT_BASE_DIR/george-pon
+export GIT_MY_DIR
+
+# オレ専用GITディレクトリ指定
+GIT_GEORGE_PON_DIR=$GIT_MY_DIR
+export GIT_GEORGE_PON_DIR
+
+# オレ専用ディレクトリ移動エイリアス
+alias cdd='cd $HOME/Desktop'
+alias cdhome='cd $HOME'
+alias cdgit='cd $GIT_BASE_DIR'
+alias cdgitmy='cd $GIT_MY_DIR'
+alias cdgitsub='cd /c/homesub/git'
+alias cdmytools='cd $GIT_GEORGE_PON_DIR/mytools'
+alias cdmyopenrepo='cd $GIT_GEORGE_PON_DIR/myopenrepo'
+alias cdmyazure='cd $GIT_GEORGE_PON_DIR/myazure'
+alias cdkjwikig='cd $GIT_GEORGE_PON_DIR/kjwikig'
+alias cdkjwikigdocker='cd $GIT_GEORGE_PON_DIR/kjwikigdocker'
+alias cdfreebsdhome='cd /c/home/freebsd/home-run-v'
+alias cdawshome='cd /c/home/aws/home-run-v'
+alias cdubuntuhome='cd /c/home/ubuntu/home-run-v'
+alias cddebianhome='cd /c/home/debian/home-run-v'
+alias cdoraclehome='cd /c/home/oracle/home-run-v'
+
+# MSYS2 特有
+export TMP=$HOME/tmp2
+
+# read mytools
+source $GIT_GEORGE_PON_DIR/mytools/bash_profile.sh
+source $GIT_GEORGE_PON_DIR/mytools/bashrc.sh
+source $GIT_GEORGE_PON_DIR/mytools/git-functions.sh
+source $GIT_GEORGE_PON_DIR/mytools/shar-cat.sh
+source $GIT_GEORGE_PON_DIR/mytools/docker-functions.sh
+source $GIT_GEORGE_PON_DIR/mytools/kubernetes-functions.sh
+source $GIT_GEORGE_PON_DIR/mytools/vagrant-functions.sh
+source $GIT_GEORGE_PON_DIR/mytools/kube-run-v.sh
+source $GIT_GEORGE_PON_DIR/mytools/ansible-role-hinagata.sh
+source $GIT_GEORGE_PON_DIR/mytools/vagrant-ssh-run-v.sh
+
+# alias調整
+alias node='node'
+unalias node
+alias rm='rm'
+unalias rm
+alias cp='cp'
+unalias cp
+alias mv='mv'
+unalias mv
+alias ls='ls'
+unalias ls
+alias ls='ls -aF --color'
+
+# PATHの先頭にgit for windows sdk mingw64/binを指定する
+# PATH="/c/home/01-desktop-tools/git-for-windows-sdk/usr/bin:/mingw64/bin/:$PATH"
+# export PATH
+
+# mingw64 path add
+if [ -d "/mingw64/bin" ]; then
+    f-path-prepend "/mingw64/bin"
+fi
+
+
+# msys用に.ssh/configをコピーする
+function f-msys-copy-ssh-config() {
+    OLD_PWD=$PWD
+    cd /home/${USER}/.ssh
+    cp /c/Users/${USER}/.ssh/config .
+    cd $OLD_PWD
+}
+
+
+# apache tomcat log directory
+function cdtomcatlog() {
+    if [ -d "/c/Program Files/Apache Software Foundation/Tomcat 10.0/logs" ] ; then
+        cd "/c/Program Files/Apache Software Foundation/Tomcat 10.0/logs"
+    fi
+}
+
+
+# alias for emacs eww
+alias f-emacs-eww-google="emacs -nw -f eww-browse https://www.google.co.jp/"
+
+#
+# end of file
+#
