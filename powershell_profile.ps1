@@ -216,6 +216,7 @@ function f-msys-bash-via-winpty {
 # ~/.minttyrc をコピーして、 .minttyrc-utf8 を作成する。
 function f-msys-bash {
     $env:HOME = $HOME
+    $env:MSYS = "nocase"
     $env:MSYS2_PATH_TYPE = "inherit"
     $env:CHERE_INVOKING = "enabled_from_arguments"
 
@@ -263,6 +264,7 @@ function f-msys-bash {
 # SJIS用のmsys-bash。vagrantは端末の文字コードがSJISでないと怒るので。
 function f-msys-bash-sjis {
     $env:HOME = $HOME
+    $env:MSYS = "nocase"
     $env:MSYS2_PATH_TYPE = "inherit"
     $env:CHERE_INVOKING = "enabled_from_arguments"
 
@@ -314,6 +316,7 @@ function f-msys-bash-sjis {
 # bash for windows ,  Windows Subsystem for Linux , Ubuntu をインストールすると bash.exe は Ubuntu の方になるので。
 function f-msys-bash-here {
     $env:HOME = $HOME
+    $env:MSYS = "nocase"
     $env:MSYS2_PATH_TYPE = "inherit"
     $env:CHERE_INVOKING = "enabled_from_arguments"
     # & msys2_shell.cmd -defterm -here -use-full-path -no-start
@@ -353,6 +356,7 @@ function f-msys-bash-here {
 # bash for windows ,  Windows Subsystem for Linux , Ubuntu をインストールすると bash.exe は Ubuntu の方になるので。
 function f-msys-bash-here-sjis {
     $env:HOME = $HOME
+    $env:MSYS = "nocase"
     $env:MSYS2_PATH_TYPE = "inherit"
     $env:CHERE_INVOKING = "enabled_from_arguments"
     # LANGの設定

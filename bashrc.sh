@@ -192,6 +192,7 @@ function f-git-bash() {
 # 引数があればコマンドと見なして実行する
 function f-msys-bash() {
 
+    export MSYS="nocase"
     export MSYS2_PATH_TYPE="inherit"
     export CHERE_INVOKING="enabled_from_arguments"
 
@@ -245,6 +246,10 @@ function f-msys-bash() {
 # ~/.minttyrc をコピーして、 .minttyrc-sjis を作成しておく。
 function f-msys-bash-sjis() {
 
+    export MSYS="nocase"
+    export MSYS2_PATH_TYPE="inherit"
+    export CHERE_INVOKING="enabled_from_arguments"
+
     # check os type
     # if type uname 1>/dev/null 2>/dev/null ; then
     #     RESULT=$( uname -o )
@@ -260,6 +265,7 @@ function f-msys-bash-sjis() {
     mintty_config_file="${HOME}/.minttyrc-sjis"
     echo "BoldAsFont=no" > $mintty_config_file
     echo "# Font=Ricty Diminished" >> $mintty_config_file
+    echo "# Font=Consolas" >> $mintty_config_file
     echo "Font=Cascadia Mono" >> $mintty_config_file
     echo "FontHeight=12" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
