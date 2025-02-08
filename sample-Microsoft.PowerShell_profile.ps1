@@ -21,24 +21,36 @@ if (Test-Path($ChocolateyProfile)) {
 
 
 # GITのベースディレクトリ
-if ( Test-Path "$HOME\AppData\Roaming\Desktop\git" ) {
-    $env:GIT_BASE_DIR = "$HOME\AppData\Roaming\Desktop\git"
+$checkGitBase = "$HOME\Desktop\obama\git"
+if ( Test-Path "$checkGitBase" ) {
+    $env:GIT_BASE_DIR = "$checkGitBase"
 }
 
 # オレ専用GITディレクトリ指定
-if ( Test-Path "$HOME\AppData\Roaming\Desktop\git\george-pon" ) {
-    $env:GIT_GEORGE_PON_DIR = "$HOME\AppData\Roaming\Desktop\git\george-pon"
+if ( Test-Path "$env:GIT_BASE_DIR\george-pon" ) {
+    $env:GIT_GEORGE_PON_DIR = "$env:GIT_BASE_DIR\george-pon"
 }
 
 # read my setup
-. $env:GIT_GEORGE_PON_DIR\mytools\powershell_profile.ps1
-. $env:GIT_GEORGE_PON_DIR\mytools\git-functions.ps1
-. $env:GIT_GEORGE_PON_DIR\mytools\docker-functions.ps1
-. $env:GIT_GEORGE_PON_DIR\mytools\kubernetes-functions.ps1
+if ( Test-Path "$env:GIT_GEORGE_PON_DIR\mytools" ) {
+    . $env:GIT_GEORGE_PON_DIR\mytools\powershell_profile.ps1
+    . $env:GIT_GEORGE_PON_DIR\mytools\git-functions.ps1
+    . $env:GIT_GEORGE_PON_DIR\mytools\docker-functions.ps1
+    . $env:GIT_GEORGE_PON_DIR\mytools\kubernetes-functions.ps1
+}
+elseif ( Test-Path "$env:GIT_GEORGE_PON_DIR\myopenrepo" ) {
+    . $env:GIT_GEORGE_PON_DIR\myopenrepo\powershell_profile.ps1
+    . $env:GIT_GEORGE_PON_DIR\myopenrepo\git-functions.ps1
+}
 
 # mytools path 追加
 if ( Test-Path "$env:GIT_GEORGE_PON_DIR\mytools" ) {
     f-path-add "$env:GIT_GEORGE_PON_DIR\mytools"
+}
+
+# myopenrepo path 追加
+if ( Test-Path "$env:GIT_GEORGE_PON_DIR\myopenrepo" ) {
+    f-path-add "$env:GIT_GEORGE_PON_DIR\myopenrepo"
 }
 
 # maven path 追加
