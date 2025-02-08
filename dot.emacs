@@ -77,6 +77,12 @@
 ;; google に変更
 ;; (setq eww-search-prefix "https://www.google.co.jp/search?q=")
 
+;; eww buffer の名前を webページのタイトル名に変更する
+(setq eww-auto-rename-buffer t)
+
+;; cookie を保存する間隔 (秒)
+(setq url-cookie-save-interval 60)
+
 ;;
 ;; ewwのテキストの色設定を無効にする。黒背景だとgoogle検索の文字が見えないので。
 ;;
