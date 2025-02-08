@@ -83,6 +83,13 @@ function prompt {
     "PS " + $env:USERNAME + "@" + $env:COMPUTERNAME + " " + $(get-location) + " > "
 }
 
+# Chocolatey package list
+function f-choco-list {
+    choco list
+    # choco export --include-version-numbers
+    # Get-Content ./packages.config
+}
+
 
 # 別ウィンドウでminttyを開いてgit bashを起動する
 # 引数があればコマンドと見なして実行する
@@ -244,7 +251,7 @@ function f-msys-bash {
     $old_lang = "$env:LANG"
     $env:LANG = "ja_JP.UTF-8"
     if ( $args.Length -eq 0 ) {
-        & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"  "/usr/bin/bash" "--login" "-i"
+        & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"  "/usr/bin/winpty" "/usr/bin/bash" "--login" "-i"
     }
     else {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --config "${mintty_config_file}"  "/usr/bin/bash"  "--login"  "-c"  "$args"
@@ -1262,6 +1269,31 @@ function f-python-venv {
 # 環境依存部
 #
 
+#----------------------------------------------------------------------
+# Git 関連ディレクトリ
+#
+
+if ( "$env:GIT_BASE_DIR" -eq "" ) {
+    # GITのベースディレクトリを仮設定
+    $env:GIT_BASE_DIR = "C:\home\git"
+    # Write-Output "env:GIT_BASE_DIR is set $env:GIT_BASE_DIR"
+}
+
+if ( "$env:GIT_GEORGE_PON_DIR" -eq "" ) {
+    # オレ専用GITディレクトリ仮設定
+    $env:GIT_GEORGE_PON_DIR = "C:\home\git\george-pon"
+    # Write-Output "env:GIT_GEORGE_PON_DIR is set $env:GIT_GEORGE_PON_DIR"
+}
+
+# mytools path 追加
+if ( Test-Path "$env:GIT_GEORGE_PON_DIR\mytools" ) {
+    f-path-add "$env:GIT_GEORGE_PON_DIR\mytools"
+}
+
+# myopenrepo path 追加
+if ( Test-Path "$env:GIT_GEORGE_PON_DIR\myopenrepo" ) {
+    f-path-add "$env:GIT_GEORGE_PON_DIR\myopenrepo"
+}
 
 #-----------------------------------------------------
 # 登録ディレクトリ
@@ -1280,6 +1312,71 @@ function cdd {
 function cdappdata {
     $env:HOMEDRIVE
     Set-Location $env:APPDATA
+}
+
+function cdgit {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR
+}
+
+function cdgit-george-pon {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\george-pon
+}
+
+function cdmytools {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_GEORGE_PON_DIR\mytools
+}
+
+function cdmyopenrepo {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_GEORGE_PON_DIR\myopenrepo
+}
+
+function cdtest1 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test1\test1
+}
+
+function cdtest2 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test2\test2
+}
+
+function cdtest3 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test3\test3
+}
+
+function cdtest4 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test4\test4
+}
+
+function cdtest5 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test5\test5
+}
+
+function cdtest6 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test6\test6
+}
+
+function cdtest7 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test7\test7
+}
+
+function cdtest8 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test8\test8
+}
+
+function cdtest9 {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\test9\test9
 }
 
 

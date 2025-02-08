@@ -121,7 +121,7 @@ function f-msys-escape() {
     if type cmd 2>/dev/null 1>/dev/null ; then
         # check msys convert ( Git for Windows )
         local result=$( cmd //c echo "/CN=Name")
-        if [ x"$result"x = x"/CN=Name"x ]; then 
+        if [ x"$result"x = x"/CN=Name"x ]; then
             MSYS_FLAG=
         else
             MSYS_FLAG=true
@@ -192,6 +192,9 @@ function f-git-bash() {
 # 引数があればコマンドと見なして実行する
 function f-msys-bash() {
 
+    export MSYS2_PATH_TYPE="inherit"
+    export CHERE_INVOKING="enabled_from_arguments"
+
     # check os type
     # if type uname 1>/dev/null 2>/dev/null ; then
     #     RESULT=$( uname -o )
@@ -207,6 +210,7 @@ function f-msys-bash() {
     mintty_config_file="${HOME}/.minttyrc-utf8"
     echo "BoldAsFont=no" > $mintty_config_file
     echo "# Font=Ricty Diminished" >> $mintty_config_file
+    echo "# Font=Consolas" >> $mintty_config_file
     echo "Font=Cascadia Mono" >> $mintty_config_file
     echo "FontHeight=12" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
@@ -221,13 +225,12 @@ function f-msys-bash() {
     echo "ForegroundColour=255,255,255" >> $mintty_config_file
     echo "CopyAsRTF=no" >> $mintty_config_file
 
-
     if [ $# -eq 0 ]; then
         # "/c/Program Files/Git/usr/bin/mintty.exe" --exec "/usr/bin/bash" --login -i &
         # "mintty.exe" --exec "/usr/bin/bash" --login -i &
         # "mintty.exe"  "/usr/bin/bash" &
         # インタラクティブに反応する bash を起動する
-        "mintty.exe" --config $mintty_config_file --exec "/usr/bin/winpty" "/usr/bin/bash" "--login" "-i" &
+        "mintty.exe" --config $mintty_config_file --exec "/usr/bin/winpty" "/usr/bin/bash" "-i" &
     else
         # echo "まだ動かない；；"
         # "/c/Program Files/Git/usr/bin/mintty.exe" --exec "/usr/bin/bash" "$@"
@@ -402,7 +405,7 @@ function f-cygwin-bash {
     #     fi
     # fi
 
-    if [ $# -eq 0 ]; then 
+    if [ $# -eq 0 ]; then
         # f-path-remove-cygwin1
         # f-path-prepend /c/tools/cygwin/bin
         # mintty.exe -i /Cygwin-Terminal.ico  --exec /usr/bin/bash --login -i &
@@ -486,7 +489,7 @@ function f-path-remove() {
         return 0
     fi
     local tempfile=$(  mktemp  $TMP/f-path-remove-XXXXXXXX.tmp )
-    echo "$PATH" | sed -e 's/:/\n/g' | while read ans 
+    echo "$PATH" | sed -e 's/:/\n/g' | while read ans
     do
         if [ x"$ans"x = x"$removepath"x ]; then
             # echo "remove PATH ... $removepath"
@@ -512,7 +515,7 @@ function f-path-remove-cygwin1() {
         removecmd=cygwin1.dll
     fi
     local tempfile=$(  mktemp  $TMP/f-path-remove-XXXXXXXX.tmp )
-    echo "$PATH" | sed -e 's/:/\n/g' | while read ans 
+    echo "$PATH" | sed -e 's/:/\n/g' | while read ans
     do
         # ディレクトリがある
         if [ -d "$ans" ] ; then
@@ -642,6 +645,98 @@ function f-shutdown-h-6-hours() {
     shutdown.exe -s -t 21600 -f
 }
 
+#
+# テスト用ディレクトリに移動
+#
+function cdtest1() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test1/test1
+            cd test1/test1
+        fi
+    fi
+}
+
+function cdtest2() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test2/test2
+            cd test2/test2
+        fi
+    fi
+}
+
+function cdtest3() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test3/test3
+            cd test3/test3
+        fi
+    fi
+}
+
+function cdtest4() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test4/test4
+            cd test4/test4
+        fi
+    fi
+}
+
+function cdtest5() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test5/test5
+            cd test5/test5
+        fi
+    fi
+}
+
+function cdtest6() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test6/test6
+            cd test6/test6
+        fi
+    fi
+}
+
+function cdtest7() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test7/test7
+            cd test7/test7
+        fi
+    fi
+}
+
+function cdtest8() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test8/test8
+            cd test8/test8
+        fi
+    fi
+}
+
+function cdtest9() {
+    if [ ! -z "$GIT_BASE_DIR" ] ; then
+        if [ -d "$GIT_BASE_DIR" ] ; then
+            cd $GIT_BASE_DIR
+            mkdir -p test9/test9
+            cd test9/test9
+        fi
+    fi
+}
 
 function hexdump() {
     if [ $# -eq 0 ]; then

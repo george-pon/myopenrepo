@@ -63,7 +63,7 @@
 ;; display cursor line
 (line-number-mode t)
 
-;; set scroll line to 1
+;; set scroll line to 2
 (setq scroll-step 2)
 
 ;; display time into mode line
