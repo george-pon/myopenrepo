@@ -23,6 +23,9 @@ fi
 # TERM
 export TERM=xterm-256color
 
+# Use case-insensitive filename globbing
+# shopt -s nocaseglob
+
 # JAVA_HOME
 if [ -d "/c/Program Files/OpenJDK/jdk-14.0.1" ]; then
     export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.1"
@@ -129,6 +132,9 @@ function cdtomcatlog() {
 
 # alias for emacs eww
 alias f-emacs-eww-google="emacs -nw -f eww-browse https://www.google.co.jp/"
+
+# alias for w3m
+alias w3m-getdiaries='w3m https://www.google.co.jp/'
 
 #
 # end of file

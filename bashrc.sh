@@ -805,6 +805,43 @@ if [ -n "$GIT_GEORGE_PON_DIR" ] ; then
     fi
 fi
 
+# add myopenrepo path
+if [ -n "$GIT_GEORGE_PON_DIR" ] ; then
+    if [ -d "$GIT_GEORGE_PON_DIR/myopenrepo" ] ; then
+        f-path-add "$GIT_GEORGE_PON_DIR/myopenrepo"
+    fi
+fi
+
+# see tomcat log
+function f-tomcat-log-less() {
+    TODAY=$( date "+%Y-%m-%d" )
+    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 10.1/logs/catalina.${TODAY}.log"
+    less -F "$LOGFILE"
+}
+
+# kjwikigdocker.war ファイルの dataStorePath を書き換えて tomcat ディレクトリにコピーする
+function f-kjwikigdocker-edit-war() {
+    if [ ! -f kjwikigdocker.war ] ; then
+        echo "file not found. kjwikigdocker.war"
+        return 1
+    fi
+
+    cp kjwikigdocker.war kjwikigdocker.zip
+    mkdir -p tmpwork
+    pushd tmpwork
+    unzip ../kjwikigdocker.zip WEB-INF/classes/kjwikig.properties
+    sed -i -e 's%authenticationMode=AuthenticationModeMay%authenticationMode=AuthenticationModeMust%g' ./WEB-INF/classes/kjwikig.properties
+    sed -i -e 's%dataStorePath=/var/lib/kjwikigdocker%dataStorePath=C:\\\\var\\\\lib\\\\kjwikigdocker%g' ./WEB-INF/classes/kjwikig.properties
+    zip -u ../kjwikigdocker.zip ./WEB-INF/classes/kjwikig.properties
+    popd
+
+    cp kjwikigdocker.zip "/c/Program Files/Apache Software Foundation/Tomcat 10.1/webapps/kjwikigdocker.war"
+
+    /bin/rm -rf tmpwork kjwikigdocker.zip
+
+}
+
+
 #
 # end of file
 #
