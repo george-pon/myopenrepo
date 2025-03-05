@@ -227,8 +227,8 @@ function f-msys-bash {
     }
     Write-Output "BoldAsFont=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Ricty Diminished" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "# Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "# Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "FontHeight=12" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -275,8 +275,8 @@ function f-msys-bash-sjis {
     }
     Write-Output "BoldAsFont=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Ricty Diminished" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "# Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "# Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "FontHeight=12" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -303,7 +303,7 @@ function f-msys-bash-sjis {
     $env:LANG = "ja_JP.SJIS"
     if ( $args.Length -eq 0 ) {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash" --login
-        & $MSYS_MINTTY --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash" --login
+        & $MSYS_MINTTY --title "mintty-sjis" --config "${mintty_config_file}" "--exec" "/usr/bin/winpty" "/usr/bin/bash" "--login" "-i"
     }
     else {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --title "mintty-sjis" --config "${mintty_config_file}"  "/usr/bin/bash"  --login -c  "$args"
@@ -1267,6 +1267,19 @@ function f-python-venv {
 }
 
 
+#
+# edge 操作
+#
+function f-edge-prof-1 {
+    # プロファイルディレクトリ  C:\Users\xxxx\AppData\Local\Microsoft\Edge\User Data\Profile 1
+    Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application"
+    & .\msedge.exe --profile-directory="Profile 1"
+}
+
+function f-edge-default {
+    Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application"
+    & .\msedge.exe --profile-directory=Default
+}
 
 
 #----------------------------------------------------------------------
