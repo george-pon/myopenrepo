@@ -13,9 +13,25 @@ function f_git() {
     return $RC
 }
 
+function git-branch-config() {
+    # git config の情報を表示する
+    echo ""
+    echo "### システム全体設定"
+    f_git config --list --system
+    echo ""
+    echo "### ユーザー毎の設定"
+    f_git config --list --global
+    echo ""
+    echo "### リポジトリ毎の設定"
+    f_git config --list --local
+}
+
 function git-user-name() {
     # GIT_IDを取得する
-    local GIT_ID=`git config --global --list|grep user.name| sed 's/user.name=//g'`
+    local GIT_ID=`git config --local --list|grep user.name| sed 's/user.name=//g'`
+    if [ -z "$GIT_ID" ]; then
+        GIT_ID=`git config --global --list|grep user.name| sed 's/user.name=//g'`
+    fi
     if [ -z "$GIT_ID" ]; then
         echo user_name_is_null
         return 1
@@ -49,11 +65,12 @@ function git-ls-files() {
 }
 
 function git-branch-a() {
-    echo "ブランチ一覧"
+    # "ブランチ一覧"
     f_git branch -a
 }
 
 function git-branch-vv() {
+    # ブランチが追跡しているorigin一覧
     echo "ブランチが追跡しているorigin一覧"
     echo "追跡するリモートブランチを設定する場合は git branch --set-upstream-to=origin/[ブランチ名]"
     f_git branch -vv
@@ -68,7 +85,7 @@ function git-initialize() {
     # 日本語パス名の文字化け対策
     git config --global core.quotepath false
 
-    # 改行コードの自動変換の無効化。
+    # 改行コードの自動変換の無効化。デフォルトはtrue。
     git config --global core.autocrlf false
 
     # ページャーは使用しない
@@ -103,6 +120,7 @@ function git-initialize() {
 
 }
 
+# git 対象ディレクトリを探索する
 function git-dirs() {
     # 全階層のgit clone のリストを作成する。
     local GIT_CLONE_DIR_LIST=`find .  -name ".git" |  egrep -v '\bpkg\b' | egrep -v '\bdep\b' | sed -e 's%.git$%%g' | sed -e 's%/$%%g' `
@@ -112,6 +130,7 @@ function git-dirs() {
     fi
 }
 
+# 再帰してgitの状態を表示
 function git-branch-status-all() {
     local GIT_ID=$( git-user-name )
     local GIT_CLONE_DIR_LIST=$( git-dirs )
@@ -389,14 +408,14 @@ function git-branch-new() {
             f_git push --set-upstream origin $BRANCH_NAME
             RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
             # リモート情報を確認
-            f_git remote -v
+            f_git remote -vv
             RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
         fi
     fi
 
     # ブランチの一覧を表示
-    # f_git branch -a
-    # RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
+    f_git branch -vv
+    RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
 
     # 現在のステータスを表示
     f_git status
@@ -434,10 +453,10 @@ function git-branch-new() {
     done
 }
 
+# 指定されたタグ名の場所にブランチを作成
+# git-branch-new-at-tag  TAG_NAME_1
+# 厳密な意味では、タグ名の場所にブランチを作ることはできないらしい(コミットが一つ進むので)
 function git-branch-new-at-tag() {
-    # 指定されたタグ名の場所にブランチを作成
-    # git-branch-new-at-tag  TAG_NAME_1
-    # 厳密な意味では、タグ名の場所にブランチを作ることはできないらしい(コミットが一つ進むので)
     if [ $# -eq 0 ] ; then
         echo "git-branch-new-at-tag tag-name"
         return 1
@@ -472,9 +491,9 @@ function git-branch-add-auto-tag() {
     git-branch-add -m "add auto commit with tag $TAG_NAME" -t $TAG_NAME
 }
 
+# ブランチの削除を実施
+# git-branch-delete branch-name
 function git-branch-delete() {
-    # ブランチの削除を実施
-    # git-branch-delete branch-name
     if [ $# -eq 0 ] ; then
         echo "git-branch-delete branch-name"
         return 1
@@ -552,6 +571,7 @@ function git-branch-tag-remove-and-push() {
     done
 }
 
+# ブランチからブランチにマージを実施する
 # arg1 から arg2 にマージする
 function git-branch-merge() {
     local MERGE_MESSAGE="auto merge"
@@ -578,6 +598,7 @@ function git-branch-merge() {
         shift
     done
 
+    # 引数チェック
     if [ -z "$ARG_SRC" -o -z "$ARG_DST" ] ; then
         echo "git-branch-merge  develop  master  ... merge develop into master"
         return 1
@@ -615,7 +636,9 @@ function git-branch-merge() {
     f_git status
 }
 
+
 # 現在のブランチに対して本家の進捗を取り込んでマージする
+# 毎回マージコミットが残るのでちょっと不便
 function git-branch-fetch-and-merge() {
     local MERGE_MESSAGE="automatic merge from origin"
     local ARG_SRC
@@ -656,6 +679,7 @@ function git-branch-fetch-and-merge() {
 
 
 # 現在のブランチに対してstash push -u してからgit pullしてstash popする
+# git stash pop した時に手動マージが発生する
 function git-branch-pull-stash() {
     local GIT_STATUS=$( git-status-check )
     if [ x"$GIT_STATUS"x = x"DURTY"x ]; then
@@ -674,6 +698,7 @@ function git-branch-pull-stash() {
 
 
 # コミットしてpushする
+# おひとりさまリポジトリだと一番よく使う
 function git-branch-add() {
     local COMMIT_COMMENT=
     local ARG_TAG_LIST=
@@ -833,7 +858,7 @@ function git-branch-sparse-checkout() {
 
 #
 # 「ええーいリモートが合ってるんだからアイツに合わせたいんだよ！」
-# とイライラしたら下記。
+# とイライラしたら下記。masterブランチ用。
 #
 function git-branch-force-master-pull() {
     f_git checkout master
@@ -844,6 +869,10 @@ function git-branch-force-master-pull() {
     RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
 }
 
+#
+# 「ええーいリモートが合ってるんだからアイツに合わせたいんだよ！」
+# とイライラしたら下記。mainブランチ用。
+#
 function git-branch-force-main-pull() {
     f_git checkout main
     RC=$? ; if [ $RC -ne 0 ]; then return 1; fi

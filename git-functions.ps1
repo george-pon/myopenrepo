@@ -10,10 +10,27 @@ function f_git {
     }
 }
 
+function git-branch-config {
+    # git config の情報を表示する
+    Write-Output ""
+    Write-Output "### システム全体設定"
+    f_git config --list --system
+    Write-Output ""
+    Write-Output "### ユーザー毎の設定"
+    f_git config --list --global
+    Write-Output ""
+    Write-Output "### リポジトリ毎の設定"
+    f_git config --list --local
+}
+
+
 function git-user-name {
     # GIT_IDを取得する
     # スペースはアンダースコアに変換
-    $GIT_ID = & git config --global --list | select-string -pattern "user.name" | ForEach-Object { $_ -replace "user.name=", "" -replace " ", "_" }
+    $GIT_ID = & git config --local --list | select-string -pattern "user.name" | ForEach-Object { $_ -replace "user.name=", "" -replace " ", "_" }
+    if ( ! $GIT_ID ) {
+        $GIT_ID = & git config --global --list | select-string -pattern "user.name" | ForEach-Object { $_ -replace "user.name=", "" -replace " ", "_" }
+    }
     if ( ! $GIT_ID ) {
         Write-Host "user.name is null."
         return ""
@@ -40,8 +57,21 @@ function git-lola {
     f_git log --graph --decorate --pretty=oneline --abbrev-commit --all
 }
 
+function git-ls-files {
+    # ファイルのアクセス許可属性の表示
+    f_git ls-files -s
+}
+
 function git-branch-a {
+    # "ブランチ一覧"
     f_git branch -a
+}
+
+function git-branch-vv {
+    # ブランチが追跡しているorigin一覧
+    Write-Output "ブランチが追跡しているorigin一覧"
+    Write-Output "追跡するリモートブランチを設定する場合は git branch --set-upstream-to=origin/[ブランチ名]"
+    f_git branch -vv
 }
 
 # よくあるgitの初期化を実施する
@@ -56,23 +86,27 @@ function git-initialize {
     # 改行コードの自動変換の無効化。デフォルトはtrue。
     # git config --global core.autocrlf false
 
-    # push を upstreamが指定されていて、かつ、リモートとローカルの同じ名前のブランチに限定する
-    git config --global push.default simple
-
     # ページャーは使用しない
     # git config --global core.pager ''
 
     # 自己署名な証明書を許可する
-    # git config --global http.sslVerify false
+    git config --global http.sslVerify false
 
     # gitの認証情報を保存する
     git config --global credential.helper store
 
+    # push を upstreamが設定されているものに限定する
+    # git config --global push.default upstream
+
+    # git ver 2.0 以降では simple がデフォルト。upstreamが設定されていて、かつ、ローカルとリモートで名前が同じブランチのみpushする。
+    git config --global push.default simple
+
+    # git pull した時の戦略。マージする。(rebaseはしない)
+    git config --global pull.rebase false
+
     # ファイル名の大文字小文字の変動を追尾する
     git config --global core.ignorecase false
 
-    # git pull した時の戦略。マージコミットする。(rebaseはしない)
-    git config --global pull.rebase false
 
     #if ( Test-Path ".git" ) {
     # ファイル名の大文字小文字の変動を追尾する(各gitリポジトリ内で実施)
@@ -93,6 +127,7 @@ function git-dirs {
     return $GIT_CLONE_DIR_LIST
 }
 
+# 再帰してgitの状態を表示
 function git-branch-status-all {
     $GIT_CLONE_DIR_LIST = ( git-dirs )
     Write-Output $GIT_CLONE_DIR_LIST | foreach-object {
@@ -107,6 +142,7 @@ function git-branch-status-all {
         Set-Location $SAVED_PWD
     }
 }
+
 
 # pull request が全部消化された時に、developに戻す際に使う
 # ユーザー名が含まれており、ローカルにだけあるブランチは消す （！注意！）
@@ -129,7 +165,7 @@ function git-branch-clean-all() {
         write-output "------------------------------"
         # fetch する。リモートリポジトリでは削除されているブランチは、削除する。
         f_git fetch --prune
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
         # カレントブランチを取得する
         $CUR_BRANCH = ( git branch | select-string -pattern '^\*' | ForEach-Object { $_ -replace "^\*", " " -replace "  ", "" } )
         # ブランチ一覧を取得する
@@ -157,7 +193,7 @@ function git-branch-clean-all() {
             Write-Output "CUR_BRANCH is $CUR_BRANCH"
             if ( ($CUR_BRANCH -eq "master") -or ($CUR_BRANCH -eq "develop") -or ($CUR_BRANCH -eq "main") ) {
                 f_git pull
-                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
             }
             else {
                 Write-Output "workspace is not master nor develop nor main branch.  skip git pull."
@@ -188,16 +224,16 @@ function git-branch-clean-all() {
                         write-output "directory: $GIT_CLONE_DIR , branch: $BR has not remote branch.  remove $BR."
                         # currentブランチがリモートにない場合はデフォルトブランチ名(developまたはmaster)に戻してブランチは削除する
                         f_git checkout $GIT_DEFAULT_BRANCH_NAME
-                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
                         f_git pull
-                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
                         f_git branch -d ${BR}
-                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
                     }
                     else {
                         write-output "directory: $GIT_CLONE_DIR , branch: $BR other case. remove $BR."
                         f_git branch -d ${BR}
-                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+                        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
                     }
                 }
             }
@@ -207,18 +243,85 @@ function git-branch-clean-all() {
     }
 }
 
+function git-branch-test-tag-exists {
+    # 引数で指定した名前のタグが存在するかチェック
+    # get first arg and shift
+    $ARG_TAG_NAME, $args = $args;
+    echo "ARG_TAG_NAME is $ARG_TAG_NAME"
+    if ( $ARG_TAG_NAME.Length -eq 0 ) {
+        Write-Host "git-branch-test-tag-exists: tag-name"
+        $RC = 1
+        return
+    }
+    $RESULT = & git tag -l | select-string -pattern "^${ARG_TAG_NAME}$"
+    echo "RESULT is $RESULT"
+    if ( $RESULT.Length -eq 0 ) {
+        Write-Output "NOTFOUND"
+        return
+    }
+    Write-Output "FOUND"
+}
+
+function git-branch-test-local-branch-exists {
+    # 引数で指定した名前のローカルブランチが存在するかチェック
+    $ARG_BRANCH_NAME, $args = $args;
+    if ( $ARG_BRANCH_NAME.Length -eq 0 ) {
+        Write-Host "git-branch-test-local-branch-exists: branch-name"
+        $RC = 1
+        return
+    }
+    $RESULT = & git branch -a | foreach-object {
+        $tmp1 = $_ -replace "^\* ", "  "
+        $tmp2 = $tmp1 -replace "^  ", ""
+        $tmp3 = $tmp2.Split(" ")[0]
+        Write-Output $tmp3
+    }  | select-string -pattern "^${ARG_BRANCH_NAME}$"
+    if ( $RESULT.Length -eq 0 ) {
+        Write-Output "NOTFOUND"
+        return
+    }
+    Write-Output "FOUND"
+}
+
+function git-branch-test-remote-branch-exists {
+    # 引数で指定した名前のリモートブランチが存在するかチェック
+    $ARG_BRANCH_NAME, $args = $args;
+    if ( $ARG_BRANCH_NAME.Length -eq 0 ) {
+        Write-Output "git-branch-test-remote-branch-exists: branch-name"
+        return
+    }
+    $RESULT = & git branch -a  | foreach-object {
+        $tmp1 = $_ -replace "^\* ", "  "
+        $tmp2 = $tmp1 -replace "^  ", ""
+        $tmp3 = $tmp2.Split(" ")[0]
+        Write-Output $tmp3
+    } | select-string -pattern "^remotes/origin/${ARG_BRANCH_NAME}$"
+    if ( $RESULT.Length -eq 0 ) {
+        Write-Output "NOTFOUND"
+        return
+    }
+    Write-Output "FOUND"
+}
+
+function git-branch-get-current-branch-name {
+    # ローカルのブランチ名を取得する
+    $RESULT = & git branch -a | select-string -pattern "^\* "
+    $RESULT2 = $RESULT -replace "^\* ", ""
+    Write-Output $RESULT2
+}
+
 function git-branch-new {
     #
     # 新しいブランチを作成する
     # git-branch-new  branch-name
     #
-    # 新しいブランチを作成する。 obama-jyun/#20180417_163658_subbranchname というブランチ名をつける。
+    # 新しいブランチを作成する。 gitユーザー名/#20180417_163658_subbranchname というブランチ名をつける。
     # git-branch-new  -n  subbranchname
     #
     # 新しいブランチを作成して git add . ; git commit ; git push を一気に行う
     # git-branch-new  -m  "commit message"
     #
-    # 新しいブランチを作成して git add . ; git commit ; git push を一気に行う
+    # 新しいブランチ branch_sub_name を作成して git add . ; git commit ; git push を一気に行う
     # git-branch-new  -m  "commit message"  -n branch_sub_name
     #
 
@@ -229,25 +332,31 @@ function git-branch-new {
     $DEFAULT_BRANCH_NAME = ( $GIT_ID + "/#" + $YMD_HMS )
     $BRANCH_NAME = $DEFAULT_BRANCH_NAME
     $COMMIT_COMMENT = ""
+    $ARG_TAG_LIST = @();
 
     # 引数解析
     while ( $args.length -gt 0 ) {
 
         # get first arg and shift
         $a1, $args = $args;
-        $a2, $rest = $args;
 
         if ( $a1 -eq "-m" ) {
             # -m comment があった場合は、コミットコメントとして採用。pushまで自動で行う。
+            $a2, $args = $args;
             $COMMIT_COMMENT = $a2
             Write-Output "auto commit mode. commit comment : $COMMIT_COMMENT"
-            $a1, $args = $args;
         }
         elseif ( $a1 -eq "-n" ) {
             # -n br-name があった場合、ブランチ名の後ろに付加する
+            $a2, $args = $args;
             $BRANCH_NAME = "${DEFAULT_BRANCH_NAME}_$a2"
             Write-Output "named branch mode. new branch name : $BRANCH_NAME"
-            $a1, $args = $args;
+        }
+        elseif ( $a1 -eq "-t" ) {
+            # -t tag があった場合は、タグ付けまで自動で行う。
+            $a2, $args = $args
+            $ARG_TAG_LIST += $a2
+            Write-Output "auto tag mode. tag : $ARG_TAG_LIST"
         }
         else {
             # 引数があった場合はブランチ名として採用
@@ -263,27 +372,82 @@ function git-branch-new {
 
     # pullする
     # f_git pull
-    # RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
+    # RC=$? ; if [ $RC -ne 0 ]; then return ; fi
 
     # リモートリポジトリでは削除されているブランチは、削除する
     f_git fetch --prune
-    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
 
-    # branchを新しく作成する
-    f_git branch $BRANCH_NAME
-    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
 
-    # 作成したブランチに切り替え
-    f_git checkout $BRANCH_NAME
-    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+    # ワークの中に未コミットのファイルがあるかチェック
+    $CHKDURTY = ( git-status-check )
+
+    # ローカルブランチが存在するか確認
+    $CHK_LOCAL_BRANCH = ( git-branch-test-local-branch-exists $BRANCH_NAME )
+    Write-Output "checking local branch ... CHK_LOCAL_BRANCH=$CHK_LOCAL_BRANCH"
+
+    # リモートブランチが存在するか確認
+    $CHK_REMOTE_BRANCH = ( git-branch-test-remote-branch-exists $BRANCH_NAME )
+    Write-Output "checking remote branch ... CHK_REMOTE_BRANCH=$CHK_REMOTE_BRANCH"
+
+    # 現在のブランチ名とターゲットブランチ名が同じなら、そのまま使う
+    $CURRENT_BRANCH_NAME = ( git-branch-get-current-branch-name )
+    Write-Output "BRANCH_NAME=$BRANCH_NAME"
+    Write-Output "CURRENT_BRANCH_NAME=$CURRENT_BRANCH_NAME"
+    if ( $BRANCH_NAME -eq $CURRENT_BRANCH_NAME ) {
+        Write-Output "current branch is $BRANCH_NAME. use it."
+    }
+    else {
+        if ( $CHK_LOCAL_BRANCH -eq "FOUND" ) {
+            Write-Output "local branch found. "
+
+            # ワーキングに未コミットファイルがある場合、ブランチ変更はできないはず。
+            if ( $CHKDURTY -eq "DURTY" ) {
+                Write-Output "WARNING working copy is durty. can not change branch."
+            }
+
+            # ブランチに切り替え
+            f_git checkout $BRANCH_NAME
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+        }
+
+        elseif ( $CHK_REMOTE_BRANCH -eq "FOUND" ) {
+            Write-Output "remote branch found. "
+
+            # ワーキングに未コミットファイルがある場合、ブランチ変更はできないはず。
+            if ( $CHKDURTY -eq "DURTY" ) {
+                Write-Output "WARNING working copy is durty. can not change branch."
+            }
+
+            # ブランチに切り替え
+            f_git checkout $BRANCH_NAME
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+
+        }
+        else {
+            Write-Output "local / remote branch not found. create it."
+            # branchを新しく作成する
+            f_git branch $BRANCH_NAME
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+            # 作成したブランチに切り替え
+            f_git checkout $BRANCH_NAME
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+            # 新ブランチは upstream を設定してpush実行
+            f_git push --set-upstream origin $BRANCH_NAME
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+            # リモート情報を確認
+            f_git remote -vv
+            $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+        }
+    }
 
     # ブランチの一覧を表示
-    f_git branch -a
-    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+    f_git branch -vv
+    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
 
     # 現在のステータスを表示
     f_git status
-    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+    $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
 
     Write-Output ""
     Write-Output "  run below commands:"
@@ -295,20 +459,34 @@ function git-branch-new {
     # コミットコメントがある場合は、add / commit / push まで行う
     if ( $COMMIT_COMMENT.length -ne 0 ) {
         f_git add .
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
         f_git commit -m "$COMMIT_COMMENT"
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
         f_git push --set-upstream origin $BRANCH_NAME
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
     }
+
+    # タグ付与が必要ならばタグ付与を行う
+    Write-Output $ARG_TAG_LIST |  foreach-object {
+        $i = $_
+        if ( $COMMIT_COMMENT.length -ne 0) {
+            git-branch-tag-and-push -m "$COMMIT_COMMENT" $i
+        }
+        else {
+            git-branch-tag-and-push $i
+        }
+        $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
+    }
+
+
 }
 
+# ブランチの削除を実施
+# git-branch-delete branch-name
 function git-branch-delete {
-    # ブランチの削除を実施
-    # git-branch-delete branch-name
     if ( $args.length -eq 0 ) {
         echo "git-branch-delete branch-name"
-        return 1
+        return
     }
 
     # 引数解析
@@ -319,11 +497,11 @@ function git-branch-delete {
 
         # local ブランチの削除
         f_git branch -d ${BRANCH_NAME}
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
 
         # remote ブランチの削除
         f_git push origin :${BRANCH_NAME}
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { return ; }
     }
 }
 
@@ -332,7 +510,7 @@ function git-branch-delete {
 function git-branch-tag-and-push {
     if ( $args.length -eq 0 ) {
         Write-Output "git-branch-tag-and-push [-m tag-comment] tag-name [tag-name]"
-        return 1
+        return
     }
 
     $COMMIT_COMMENT = "add tag"
@@ -369,16 +547,16 @@ function git-branch-tag-and-push {
                 Write-Output "git-branch-tag-and-push: tag $ARG_TAG is already set."
                 Write-Output "git-branch-tag-and-push: at first , remove tag $ARG_TAG."
                 f_git tag -d $ARG_TAG
-                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return 1; }
+                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return ; }
                 f_git push origin ":$ARG_TAG"
                 $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. but continue." ; }
             }
         }
         # タグをつけて、originにpushする。
         f_git tag -m "$COMMIT_COMMENT" $ARG_TAG
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return ; }
         f_git push origin $ARG_TAG
-        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return 1; }
+        $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return ; }
     }
 }
 
@@ -386,7 +564,7 @@ function git-branch-tag-and-push {
 function git-branch-tag-remove-and-push {
     if ( $args.Length -eq 0 ) {
         Write-Output "git-branch-tag-remove-and-push tag-name"
-        return 1
+        return
     }
 
     Write-Output $args | foreach-object {
@@ -398,15 +576,80 @@ function git-branch-tag-remove-and-push {
             if ( $i -eq $ARG_TAG ) {
                 Write-Output "git-branch-tag-remove-and-push: remove tag $ARG_TAG."
                 f_git tag -d $ARG_TAG
-                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return 1; }
+                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return ; }
                 f_git push origin ":$ARG_TAG"
-                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return 1; }
+                $RC = $LASTEXITCODE ; if ( $RC -ne 0 ) { Write-Output "ERROR. abort." ; return ; }
             }
         }
     }
 }
 
+# ブランチからブランチにマージを実施する
+# arg1 から arg2 にマージする
+function git-branch-merge() {
+    $MERGE_MESSAGE = "auto merge"
+    $ARG_SRC = ""
+    $ARG_DST = ""
+    $ARG_CNT = 0
+
+    # 引数解析
+    while ($args.Length -gt 0) {
+        $a1, $args = $args
+        $a2, $rest = $args
+        if ( $a1 -eq "-m" ) {
+            $MERGE_MESSAGE = $a2
+        }
+        elseif ($ARG_CNT -eq 0) {
+            $ARG_SRC = $a1
+            $ARG_CNT = $ARG_CNT + 1
+        }
+        elseif ($ARG_CNT -eq 1) {
+            $ARG_DST = $a1
+            $ARG_CNT = $ARG_CNT + 1
+        }
+    }
+
+    # 引数チェック
+    if (( $ARG_SRC.Length -eq 0 ) -or ($ARG_DST.Length -eq 0)) {
+        Write-Output "git-branch-merge  develop  master  ... merge develop into master"
+        return
+    }
+
+    # pullする
+    f_git pull
+    $RC = $LASTEXITCODE ; if ($RC -ne 0) { return ; }
+
+    # マージする先masterをチェックアウトする
+    f_git checkout $ARG_DST
+    $RC = $LASTEXITCODE ; if ($RC -ne 0) { return ; }
+
+    # pullする
+    f_git pull
+    $RC = $LASTEXITCODE ; if ($RC -ne 0) { return ; }
+
+    # developをマージする
+    f_git merge -m "$MERGE_MESSAGE" $ARG_SRC
+    $RC = $LASTEXITCODE ; if ($RC -ne 0) { return ; }
+
+    # commitする
+    #f_git commit -m "merge from develop"
+    #RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
+
+    # pushする
+    f_git push
+    $RC = $LASTEXITCODE ; if ($RC -ne 0) { return ; }
+
+    # developをチェックアウトする
+    #f_git checkout $ARG_SRC
+    #RC=$? ; if [ $RC -ne 0 ]; then return 1; fi
+
+    # 状態表示
+    f_git status
+}
+
+
 # 現在のブランチに対して本家の進捗を取り込んでマージする
+# 毎回マージコミットが残るのでちょっと不便
 function git-branch-fetch-and-merge {
     $MERGE_MESSAGE = "automatic merge from origin"
     $ARG_SRC = ""
@@ -447,6 +690,7 @@ function git-branch-fetch-and-merge {
 
 
 # 現在のブランチに対してstash push -u してからgit pullしてstash popする
+# git stash pop した時に手動マージが発生する
 function git-branch-pull-stash {
     $GIT_STATUS = git-status-check
     if ( $GIT_STATUS -eq "DURTY") {
@@ -464,7 +708,9 @@ function git-branch-pull-stash {
 }
 
 
+
 # コミットしてpushする
+# おひとりさまリポジトリだと一番よく使う
 function git-branch-add {
     $COMMIT_COMMENT = ""
     $ARG_TAG_LIST = @();
@@ -498,14 +744,14 @@ function git-branch-add {
     if ( $GIT_STATUS -eq "DURTY") {
 
         f_git add .
-        $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
 
         if ( $COMMIT_COMMENT.length -ne 0) {
             f_git commit -m "$COMMIT_COMMENT"
-            $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+            $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
 
             f_git push
-            $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+            $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
         }
     }
 
@@ -517,8 +763,34 @@ function git-branch-add {
         else {
             git-branch-tag-and-push $i
         }
-        $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+        $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
     }
+}
+
+#
+# 「ええーいリモートが合ってるんだからアイツに合わせたいんだよ！」
+# とイライラしたら下記。masterブランチ用。
+#
+function git-branch-force-master-pull {
+    f_git checkout master
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+    f_git fetch origin
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+    f_git reset --hard origin/master
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+}
+
+#
+# 「ええーいリモートが合ってるんだからアイツに合わせたいんだよ！」
+# とイライラしたら下記。mainブランチ用。
+#
+function git-branch-force-main-pull {
+    f_git checkout main
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+    f_git fetch origin
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
+    f_git reset --hard origin/main
+    RC=$LASTEXITCODE ; if ( $RC -ne 0 ) { return; }
 }
 
 #
@@ -527,14 +799,20 @@ function git-branch-add {
 
 # workspace上の未追跡ファイルも含めて一時的に退避する。gitワークスペースはcleanな状態になる。
 function git-stash-push-u {
-    f_git stash save -u "$args"
-    $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+    $dateString = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $COMMENT = "stash saved ${dateString}"
+    if ($args.Length -gt 0 ) {
+        $a1, $args = $args
+        COMMENT="$a1"
+    }
+    f_git stash push -u -m "$COMMENT"
+    $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
 }
 
 # stashから戻す。使用したstashは消す。
 function git-stash-pop {
     f_git stash pop
-    $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return 1; }
+    $RC = $LASTEXITCODE ; if ($RC -ne 0 ) { return ; }
 }
 
 # stashの一覧
@@ -551,7 +829,7 @@ function git-stash-show {
 function git-stash-apply {
     if ( $args.Length -eq 0 ) {
         Write-Output "ex: git-stash-apply 0"
-        return 0
+        return
     }
     $arg1, $args = $args
     f_git stash apply "stash@{$arg1}"
@@ -561,7 +839,7 @@ function git-stash-apply {
 function git-stash-drop {
     if ( $args.Length -eq 0 ) {
         Write-Output "ex: git-stash-drop 0"
-        return 0
+        return
     }
     $arg1, $args = $args
     f_git stash drop "stash@{$arg1}"
@@ -571,3 +849,6 @@ function git-stash-drop {
 function git-stash-clear {
     f_git stash clear
 }
+#
+# end of file
+#
