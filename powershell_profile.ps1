@@ -1270,10 +1270,18 @@ function f-python-venv {
 #
 # edge 操作
 #
-function f-edge-prof-1 {
+function f-edge-prof-n {
+    $a1 = "1"
+    if ( $args.Length -gt 0 ) {
+        $a1, $args = $args
+    }
+    $a2 = ""
+    if ( $args.Length -gt 0 ) {
+        $a2, $args = $args
+    }
     # プロファイルディレクトリ  C:\Users\xxxx\AppData\Local\Microsoft\Edge\User Data\Profile 1
     Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application"
-    & .\msedge.exe --profile-directory="Profile 1"
+    & .\msedge.exe --profile-directory="Profile $a1" $a2
 }
 
 function f-edge-default {

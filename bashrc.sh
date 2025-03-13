@@ -843,5 +843,49 @@ function f-kjwikigdocker-edit-war() {
 
 
 #
+# edge 操作
+#
+function f-edge-prof-n() {
+    a1=1
+    if [ $# -gt 0 ] ; then
+        a1=$1
+        shift
+    fi
+    a2=
+    if [ $# -gt 0 ] ; then
+        a2=$1
+        shift
+    fi
+    # プロファイルディレクトリ  C:\Users\xxxx\AppData\Local\Microsoft\Edge\User Data\Profile 1
+    cd "/c/Program Files (x86)/Microsoft/Edge/Application"
+    ./msedge.exe --profile-directory="Profile $a1" $a2
+}
+
+function f-edge-default() {
+    cd "/c/Program Files (x86)/Microsoft/Edge/Application"
+    ./msedge.exe --profile-directory=Default
+}
+
+# プロファイルの一覧を表示
+function f-edge-profile-list() {
+    cd ~
+    cd "./AppData/Local/Microsoft/Edge/User Data/"
+
+    for i in $( seq 1 25 )
+    do
+        prof_dir="Profile $i"
+        if [ -d "$prof_dir" ] ; then
+            prof_file="$prof_dir/Preferences"
+            if [ -f "$prof_file" ] ; then
+                prof_name=$( cat "$prof_file" | jq ".profile.name" )
+                echo "$prof_file : $prof_name"
+            fi
+        fi
+    done
+}
+
+
+
+#
 # end of file
 #
