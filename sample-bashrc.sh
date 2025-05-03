@@ -6,6 +6,14 @@
 # プロンプト
 PS1='MSYS2 \u@\h \w $ '
 
+# docker host を固定指定する
+# export DOCKER_HOST=tcp://192.168.33.10:2375
+# export DOCKER_HOST=tcp://192.168.12.10:2375
+# export DOCKER_HOST=ssh://vagrant@master1
+# export DOCKER_HOST=tcp://192.168.72.76:2375
+# export DOCKER_HOST=tcp://192.168.80.80:2375
+# export DOCKER_HOST=tcp://debian81:2375
+# export DOCKER_HOST=ssh://debian81
 
 # 環境変数DISPLAYを適当に設定する
 if [ -z "$DISPLAY" ] ; then
@@ -25,11 +33,6 @@ export TERM=xterm-256color
 
 # Use case-insensitive filename globbing
 # shopt -s nocaseglob
-
-# JAVA_HOME
-if [ -d "/c/Program Files/OpenJDK/jdk-14.0.1" ]; then
-    export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.1"
-fi
 
 # GITのベースディレクトリ
 checkGitBase="$HOME/Desktop/obama/git"
@@ -51,9 +54,17 @@ alias cdd='cd $HOME/Desktop'
 alias cdhome='cd $HOME'
 alias cdgitmy='cd $GIT_MY_DIR'
 alias cdgit='cd $GIT_BASE_DIR'
-alias cdgitsub='cd /c/homesub/git'
-alias cdmytools='cd $GIT_GEORGE_PON_DIR/mytools'
-alias cdmyopenrepo='cd $GIT_GEORGE_PON_DIR/myopenrepo'
+
+# vagrant ディレクトリは SSD 特例の例外がある
+# alias cdvagrant='cd $GIT_GEORGE_PON_DIR/vagrant'
+function cdvagrant() {
+    if [ -d "/c/HOMESSD/git/george-pon/vagrant" ] ; then
+        cd /c/HOMESSD/git/george-pon/vagrant
+    else
+        cd $GIT_GEORGE_PON_DIR/vagrant
+    fi
+}
+
 if [ -d "$GIT_GEORGE_PON_DIR/mytools" ] ; then
     alias cdmytools='cd $GIT_GEORGE_PON_DIR/mytools'
 fi
@@ -75,7 +86,8 @@ export TMP=$HOME/tmp2
 # read mytools
 if [ -d "$GIT_GEORGE_PON_DIR/mytools" ] ; then
     source $GIT_GEORGE_PON_DIR/mytools/bash_profile.sh
-    source $GIT_GEORGE_PON_DIR/mytools/bashrc.sh
+    source $GIT_GEORGE_PON_DIR/mytools/bashrc-common.sh
+    source $GIT_GEORGE_PON_DIR/mytools/bashrc-home.sh
     source $GIT_GEORGE_PON_DIR/mytools/git-functions.sh
     source $GIT_GEORGE_PON_DIR/mytools/shar-cat.sh
     source $GIT_GEORGE_PON_DIR/mytools/docker-functions.sh
@@ -85,7 +97,7 @@ if [ -d "$GIT_GEORGE_PON_DIR/mytools" ] ; then
     source $GIT_GEORGE_PON_DIR/mytools/ansible-role-hinagata.sh
     source $GIT_GEORGE_PON_DIR/mytools/vagrant-ssh-run-v.sh
 elif [ -d "$GIT_GEORGE_PON_DIR/myopenrepo" ] ; then
-    source $GIT_GEORGE_PON_DIR/myopenrepo/bashrc.sh
+    source $GIT_GEORGE_PON_DIR/myopenrepo/bashrc-common.sh
     source $GIT_GEORGE_PON_DIR/myopenrepo/git-functions.sh
 fi
 
@@ -121,6 +133,31 @@ function f-msys-copy-ssh-config() {
     cd $OLD_PWD
 }
 
+# Android Studio 環境整備
+function f-setup-android-studio() {
+    # JDK 1.8を指定する
+    f-path-prepend "/c/Program Files/Java/jdk1.8.0_251/bin"
+    JAVA_HOME="c:/Program Files/Java/jdk1.8.0_251"
+    export JAVA_HOME
+
+    # emulator.exeにパスを通す
+    f-path-prepend "/c/Users/fj6782ix/AppData/Local/Android/Sdk/emulator"
+
+    # 設定確認
+    f-path-show
+    java -version
+
+    # 環境変数設定
+    export ANDROID_SDK_ROOT="$HOME/AppData/Local/Android/Sdk"
+
+    cd "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Android Studio"
+    # $proc = Start-Process "C:\Program Files\Android\Android Studio\bin\studio64.exe"
+    # $proc.WaitForExit()
+    "C:\Program Files\Android\Android Studio\bin\studio64.exe"
+
+    echo "starting android studio ..."
+}
+# f-setup-android-studio
 
 # apache tomcat log directory
 function cdtomcatlog() {
@@ -131,10 +168,12 @@ function cdtomcatlog() {
 
 
 # alias for emacs eww
-alias f-emacs-eww-google="emacs -nw -f eww-browse https://www.google.co.jp/"
+alias emacs-eww-google="emacs -nw -f eww-browse https://www.google.co.jp/"
+alias emacs-eww-getdiaries="emacs -nw -f eww-browse http://www.ceres.dti.ne.jp/~george/getdiaries.html"
 
 # alias for w3m
-alias w3m-getdiaries='w3m https://www.google.co.jp/'
+alias w3m-getdiaries='w3m http://www.ceres.dti.ne.jp/~george/getdiaries.html'
+
 
 #
 # end of file

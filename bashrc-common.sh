@@ -57,10 +57,10 @@ function f-check-tty() {
 
 # ~/.inputrc が無い場合は作成
 if [ ! -f ~/.inputrc ] ; then
-    echo "set convert-meta off" > ~/.inputrc
-    echo "set meta-flag on" > ~/.inputrc
-    echo "set output-meta on" > ~/.inputrc
-    echo "set enable-bracketed-paste off" > ~/.inputrc
+    echo "set convert-meta off" >> ~/.inputrc
+    echo "set meta-flag on" >> ~/.inputrc
+    echo "set output-meta on" >> ~/.inputrc
+    echo "set enable-bracketed-paste off" >> ~/.inputrc
 fi
 
 
@@ -160,6 +160,26 @@ function f-msys-escape() {
 
 
 
+# vagrant provider指定 (hyperv or virtualbox)
+# 現在Hyper-Vが有効かどうかにしたがって環境変数VAGRANT_DEFAULT_PROVIDERを設定する
+function f-hyperv-check() {
+    if type bcdedit 1>/dev/null 2>/dev/null ; then
+        local RESULT=$( bcdedit $( f-msys-escape /enum ) | grep "hypervisorlaunchtype" )
+        local RESULT2=$( echo $RESULT | grep "Auto" )
+        local RESULT3=$( echo $RESULT | grep "Off" )
+        if [ -n  "$RESULT2" ] ; then
+            # echo "Hyper-V is ON"
+            export VAGRANT_DEFAULT_PROVIDER="hyperv"
+        fi
+        if [ -n "$RESULT3" ] ; then
+            # echo "Hyper-V is OFF"
+            export VAGRANT_DEFAULT_PROVIDER="virtualbox"
+        fi
+    fi
+}
+
+# do hyper-v check
+f-hyperv-check
 
 # run git bash in other window
 # 引数があればコマンドと見なして実行する
@@ -542,11 +562,45 @@ function f-path-remove-cygwin1() {
     fi
 }
 
-
 function f-path-show() {
     echo $PATH | sed -e 's/:/\n/g'
 }
 
+#
+# azure cli 設定
+#
+
+# az cli 用にPATHを編集する
+function f-az-path-init() {
+    # Python38のPATHを末尾に移動する。azコマンドがgit for windowsで動かなくなるので。
+    for i in /c/Python38/Scripts /c/Python38
+    do
+        if [ -d $i ] ; then
+            echo "hoge"
+            # f-path-remove $i
+            # f-path-add $i
+        fi
+    done
+    # Azure CLI をPATHの先頭に移動する
+    for i in "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/wbin"  "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2"  "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/Scripts"
+    do
+        if [ -d "$i" ] ; then
+            echo "hoge"
+            # f-path-remove "$i"
+            # f-path-prepend "$i"
+        fi
+    done
+    export PYTHONPATH=
+
+}
+
+# Git Bash for Windowsの場合は、azシェルスクリプトを実行しない
+# MSYSの場合はパスを設定する。wbinを先頭に設定すると、az.cmdとかaz(bash shell)が使える。
+function f-az-init() {
+    f-path-prepend "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2"
+    f-path-prepend "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/Scripts"
+    f-path-prepend "/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/wbin"
+}
 
 # no_proxyに追加する。
 # 既にある場合は何もしない。
@@ -650,6 +704,9 @@ function f-shutdown-h-6-hours() {
     f-vagrant-poweroff-all
     shutdown.exe -s -t 21600 -f
 }
+
+
+
 
 #
 # テスト用ディレクトリに移動
@@ -819,6 +876,13 @@ function f-tomcat-log-less() {
     less -F "$LOGFILE"
 }
 
+# see tomcat log
+function f-tomcat-log-tail() {
+    TODAY=$( date "+%Y-%m-%d" )
+    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 10.1/logs/catalina.${TODAY}.log"
+    tail -f "$LOGFILE"
+}
+
 # kjwikigdocker.war ファイルの dataStorePath を書き換えて tomcat ディレクトリにコピーする
 function f-kjwikigdocker-edit-war() {
     if [ ! -f kjwikigdocker.war ] ; then
@@ -885,7 +949,15 @@ function f-edge-profile-list() {
 }
 
 
+# vagrant用のディレクトリ位置を特定する
+# SSD用の特殊位置があるため
+if [ -d /C/HOMESSD/git/george-pon/vagrant ] ; then
+    export VAGRANT_BASE_DIR=/C/HOMESSD/git/george-pon/vagrant
+elif [ -d /D/HOME/git/george-pon/vagrant ] ; then
+    export VAGRANT_BASE_DIR=/D/HOME/git/george-pon/vagrant
+fi
 
 #
 # end of file
 #
+
