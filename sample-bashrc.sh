@@ -168,12 +168,13 @@ function cdtomcatlog() {
 
 
 # alias for emacs eww
+alias emacs-eww-browse="emacs -nw -f eww-browse"
 alias emacs-eww-google="emacs -nw -f eww-browse https://www.google.co.jp/"
 alias emacs-eww-getdiaries="emacs -nw -f eww-browse http://www.ceres.dti.ne.jp/~george/getdiaries.html"
 
 # alias for w3m
+alias w3m-google="w3m https://www.google.co.jp/"
 alias w3m-getdiaries='w3m http://www.ceres.dti.ne.jp/~george/getdiaries.html'
-
 
 #
 # end of file

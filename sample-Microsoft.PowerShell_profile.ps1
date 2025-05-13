@@ -82,6 +82,16 @@ if ( Test-Path "C:\Program Files\Mozilla Firefox" ) {
     f-path-add "C:\Program Files\Mozilla Firefox"
 }
 
+# Chrome
+if ( Test-Path "C:\Program Files\Google\Chrome\Application" ) {
+	f-path-add "C:\Program Files\Google\Chrome\Application"
+}
+
+# sakura editor
+if ( Test-Path "C:\Program Files (x86)\sakura" ) {
+    f-path-add "C:\Program Files (x86)\sakura"
+}
+
 # prepend bash.exe and mintty.exe path for git for windows SDK
 # if ( Test-Path "C:\home\01-desktop-tools\git-for-windows-sdk\usr\bin" ) {
 # $env:PATH = "C:\home\01-desktop-tools\git-for-windows-sdk\usr\bin" + ";" + $env:Path
@@ -115,7 +125,7 @@ function f-edit-profile {
 
 # .bashrc のサンプルを更新する
 function f-edit-bashrc-sample {
-    & winmergeu.exe $HOME\.bashrc    $env:GIT_GEORGE_PON_DIR/mytools/sample-bashrc
+    & winmergeu.exe $HOME\.bashrc    $env:GIT_GEORGE_PON_DIR/mytools/sample-bashrc.sh
 }
 
 # powershell profile のサンプルを更新する
