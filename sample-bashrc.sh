@@ -34,8 +34,15 @@ export TERM=xterm-256color
 # Use case-insensitive filename globbing
 # shopt -s nocaseglob
 
+# 個人のベースディレクトリ
+if [ -d "$HOME/Desktop/obama" ] ; then
+    export PERSONAL_BASE_DIR="$HOME/Desktop/obama"
+elif [ -d "/c/HOME" ] ; then
+    export PERSONAL_BASE_DIR="/c/HOME"
+fi
+
 # GITのベースディレクトリ
-checkGitBase="$HOME/Desktop/obama/git"
+checkGitBase="${PERSONAL_BASE_DIR}/git"
 if [ -d "$checkGitBase" ] ; then
     GIT_BASE_DIR="$checkGitBase"
     export GIT_BASE_DIR
@@ -54,6 +61,7 @@ alias cdd='cd $HOME/Desktop'
 alias cdhome='cd $HOME'
 alias cdgitmy='cd $GIT_MY_DIR'
 alias cdgit='cd $GIT_BASE_DIR'
+alias cdgitsub='cd /c/homesub/git'
 
 # vagrant ディレクトリは SSD 特例の例外がある
 # alias cdvagrant='cd $GIT_GEORGE_PON_DIR/vagrant'

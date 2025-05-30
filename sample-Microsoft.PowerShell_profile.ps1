@@ -19,9 +19,16 @@ if (Test-Path($ChocolateyProfile)) {
     Import-Module "$ChocolateyProfile"
 }
 
+# 個人のベースディレクトリ
+if ( Test-Path "$HOME\Desktop\obama"  ) {
+    $env:PERSONAL_BASE_DIR = "$HOME\Desktop\obama"
+}
+elseif ( Test-Path "C:\HOME" ) {
+    $env:PERSONAL_BASE_DIR = "C:\HOME"
+}
 
 # GITのベースディレクトリ
-$checkGitBase = "$HOME\Desktop\obama\git"
+$checkGitBase = "$env:PERSONAL_BASE_DIR\git"
 if ( Test-Path "$checkGitBase" ) {
     $env:GIT_BASE_DIR = "$checkGitBase"
 }
@@ -84,7 +91,7 @@ if ( Test-Path "C:\Program Files\Mozilla Firefox" ) {
 
 # Chrome
 if ( Test-Path "C:\Program Files\Google\Chrome\Application" ) {
-	f-path-add "C:\Program Files\Google\Chrome\Application"
+    f-path-add "C:\Program Files\Google\Chrome\Application"
 }
 
 # sakura editor
