@@ -693,7 +693,8 @@ function f-list-to-comma-str {
         if ( $cmd_args.length -ne 0 ) {
             $cmd_args += ","
         }
-        $cmd_args += "$j"
+        # '"Program Files"' みたいな出力を作る
+        $cmd_args += "`'`"$j`"`'"
     }
     return $cmd_args
 }
