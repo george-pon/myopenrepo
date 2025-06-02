@@ -468,7 +468,7 @@ function f_is_text_file() {
 # PATHに追加する。
 # 既にある場合は何もしない。
 function f-path-add() {
-    local addpath=$1
+    local addpath="$1"
     if [ -z "$addpath" ]; then
         echo "f-path-add  path"
         return 0
@@ -535,7 +535,7 @@ function f-path-remove() {
 # cygwin1.dllがあるPATHをPATHから削除する。
 # ない場合は何もしない。
 function f-path-remove-cygwin1() {
-    local removecmd=$1
+    local removecmd="$1"
     local resultpath=
     if [ -z "$removecmd" ]; then
         removecmd=cygwin1.dll
@@ -557,7 +557,7 @@ function f-path-remove-cygwin1() {
     resultpath=$( echo $resultpath | sed -e 's/:$//g' )
     /bin/rm $tempfile
     if [ -n "$resultpath" ]; then
-        PATH=$resultpath
+        PATH="$resultpath"
         export PATH
     fi
 }

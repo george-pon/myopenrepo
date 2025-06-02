@@ -50,17 +50,17 @@ fi
 
 # GITのオレ専用ベースディレクトリ
 if [ -d "$GIT_BASE_DIR/george-pon" ] ; then
-    GIT_MY_DIR=$GIT_BASE_DIR/george-pon
+    GIT_MY_DIR="$GIT_BASE_DIR/george-pon"
     export GIT_MY_DIR
-    GIT_GEORGE_PON_DIR=$GIT_BASE_DIR/george-pon
+    GIT_GEORGE_PON_DIR="$GIT_BASE_DIR/george-pon"
     export GIT_GEORGE_PON_DIR
 fi
 
 # オレ専用ディレクトリ移動エイリアス
 alias cdd='cd $HOME/Desktop'
 alias cdhome='cd $HOME'
-alias cdgitmy='cd $GIT_MY_DIR'
-alias cdgit='cd $GIT_BASE_DIR'
+alias cdgitmy='cd "$GIT_MY_DIR"'
+alias cdgit='cd "$GIT_BASE_DIR"'
 alias cdgitsub='cd /c/homesub/git'
 
 # vagrant ディレクトリは SSD 特例の例外がある
@@ -69,19 +69,19 @@ function cdvagrant() {
     if [ -d "/c/HOMESSD/git/george-pon/vagrant" ] ; then
         cd /c/HOMESSD/git/george-pon/vagrant
     else
-        cd $GIT_GEORGE_PON_DIR/vagrant
+        cd "$GIT_GEORGE_PON_DIR/vagrant"
     fi
 }
 
 if [ -d "$GIT_GEORGE_PON_DIR/mytools" ] ; then
-    alias cdmytools='cd $GIT_GEORGE_PON_DIR/mytools'
+    alias cdmytools='cd "$GIT_GEORGE_PON_DIR/mytools"'
 fi
 if [ -d "$GIT_GEORGE_PON_DIR/myopenrepo" ] ; then
-    alias cdmyopenrepo='cd $GIT_GEORGE_PON_DIR/myopenrepo'
+    alias cdmyopenrepo='cd "$GIT_GEORGE_PON_DIR/myopenrepo"'
 fi
-alias cdmyazure='cd $GIT_GEORGE_PON_DIR/myazure'
-alias cdkjwikig='cd $GIT_GEORGE_PON_DIR/kjwikig'
-alias cdkjwikigdocker='cd $GIT_GEORGE_PON_DIR/kjwikigdocker'
+alias cdmyazure='cd "$GIT_GEORGE_PON_DIR/myazure"'
+alias cdkjwikig='cd "$GIT_GEORGE_PON_DIR/kjwikig"'
+alias cdkjwikigdocker='cd "$GIT_GEORGE_PON_DIR/kjwikigdocker"'
 alias cdfreebsdhome='cd /c/home/freebsd/home-run-v'
 alias cdawshome='cd /c/home/aws/home-run-v'
 alias cdubuntuhome='cd /c/home/ubuntu/home-run-v'
@@ -93,20 +93,20 @@ export TMP=$HOME/tmp2
 
 # read mytools
 if [ -d "$GIT_GEORGE_PON_DIR/mytools" ] ; then
-    source $GIT_GEORGE_PON_DIR/mytools/bash_profile.sh
-    source $GIT_GEORGE_PON_DIR/mytools/bashrc-common.sh
-    source $GIT_GEORGE_PON_DIR/mytools/bashrc-home.sh
-    source $GIT_GEORGE_PON_DIR/mytools/git-functions.sh
-    source $GIT_GEORGE_PON_DIR/mytools/shar-cat.sh
-    source $GIT_GEORGE_PON_DIR/mytools/docker-functions.sh
-    source $GIT_GEORGE_PON_DIR/mytools/kubernetes-functions.sh
-    source $GIT_GEORGE_PON_DIR/mytools/vagrant-functions.sh
-    source $GIT_GEORGE_PON_DIR/mytools/kube-run-v.sh
-    source $GIT_GEORGE_PON_DIR/mytools/ansible-role-hinagata.sh
-    source $GIT_GEORGE_PON_DIR/mytools/vagrant-ssh-run-v.sh
+    source "$GIT_GEORGE_PON_DIR/mytools/bash_profile.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/bashrc-common.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/bashrc-home.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/git-functions.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/shar-cat.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/docker-functions.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/kubernetes-functions.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/vagrant-functions.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/kube-run-v.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/ansible-role-hinagata.sh"
+    source "$GIT_GEORGE_PON_DIR/mytools/vagrant-ssh-run-v.sh"
 elif [ -d "$GIT_GEORGE_PON_DIR/myopenrepo" ] ; then
-    source $GIT_GEORGE_PON_DIR/myopenrepo/bashrc-common.sh
-    source $GIT_GEORGE_PON_DIR/myopenrepo/git-functions.sh
+    source "$GIT_GEORGE_PON_DIR/myopenrepo/bashrc-common.sh"
+    source "$GIT_GEORGE_PON_DIR/myopenrepo/git-functions.sh"
 fi
 
 
@@ -136,8 +136,8 @@ fi
 # msys用に.ssh/configをコピーする
 function f-msys-copy-ssh-config() {
     OLD_PWD=$PWD
-    cd /home/${USER}/.ssh
-    cp /c/Users/${USER}/.ssh/config .
+    cd "/home/${USER}/.ssh"
+    cp "/c/Users/${USER}/.ssh/config" .
     cd $OLD_PWD
 }
 
