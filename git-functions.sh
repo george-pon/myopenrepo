@@ -28,9 +28,12 @@ function git-branch-config() {
 
 function git-user-name() {
     # GIT_IDを取得する
-    local GIT_ID=`git config --local --list|grep user.name| sed 's/user.name=//g'`
+    local GIT_ID=""
+    if git config --local --list > /dev/null 2>&1 ; then
+        GIT_ID=`git config --local --list | grep user.name| sed 's/user.name=//g'`
+    fi
     if [ -z "$GIT_ID" ]; then
-        GIT_ID=`git config --global --list|grep user.name| sed 's/user.name=//g'`
+        GIT_ID=`git config --global --list | grep user.name| sed 's/user.name=//g'`
     fi
     if [ -z "$GIT_ID" ]; then
         echo user_name_is_null
@@ -121,30 +124,32 @@ function git-initialize() {
 }
 
 # git 対象ディレクトリを探索する
-function git-dirs() {
-    # 全階層のgit clone のリストを作成する。
-    local GIT_CLONE_DIR_LIST=`find .  -name ".git" |  egrep -v '\bpkg\b' | egrep -v '\bdep\b' | sed -e 's%.git$%%g' | sed -e 's%/$%%g' `
-    echo $GIT_CLONE_DIR_LIST
-    if [ -z "$GIT_CLONE_DIR_LIST" ]; then
-        return 1
-    fi
-}
+#function git-dirs() {
+#    # 全階層のgit clone のリストを作成する。
+#    local GIT_CLONE_DIR_LIST=`find .  -name ".git" |  egrep -v '\bpkg\b' | egrep -v '\bdep\b' | sed -e 's%.git$%%g' | sed -e 's%/$%%g' `
+#    echo $GIT_CLONE_DIR_LIST
+#    if [ -z "$GIT_CLONE_DIR_LIST" ]; then
+#        return 1
+#    fi
+#}
 
 # 再帰してgitの状態を表示
 function git-branch-status-all() {
     local GIT_ID=$( git-user-name )
-    local GIT_CLONE_DIR_LIST=$( git-dirs )
-    for GIT_CLONE_DIR in $GIT_CLONE_DIR_LIST
+    # local GIT_CLONE_DIR_LIST=$( git-dirs )
+    # bashの配列に結果を格納
+    mapfile -t  GIT_CLONE_DIR_LIST < <( find .  -name ".git" |  egrep -v '\bpkg\b' | egrep -v '\bdep\b' | sed -e 's%.git$%%g' | sed -e 's%/$%%g' )
+    for GIT_CLONE_DIR in "${GIT_CLONE_DIR_LIST[@]}"
     do
-        SAVED_PWD=$PWD
-        cd ${GIT_CLONE_DIR}
+        SAVED_PWD="$PWD"
+        cd "${GIT_CLONE_DIR}"
         echo "------------------------------"
         echo "----- ${GIT_CLONE_DIR}  "
         echo "------------------------------"
         # git fetch --prune
         f_git status
         echo ""
-        cd $SAVED_PWD
+        cd "$SAVED_PWD"
     done
 }
 
@@ -154,17 +159,20 @@ function git-branch-status-all() {
 # dep,pkgというディレクトリの下の.gitは無視する。depコマンドで拾った依存ライブラリはgit pullしない。
 function git-branch-clean-all() {
     local GIT_ID=$( git-user-name )
-    local GIT_CLONE_DIR_LIST=$( git-dirs )
+
     echo "#"
-    echo "# delete ${GIT_ID}'s branches"
+    echo "# clean ${GIT_ID}'s branches"
     echo "#"
 
+    # local GIT_CLONE_DIR_LIST=$( git-dirs )
+    # bashの配列に結果を格納
+    mapfile -t  GIT_CLONE_DIR_LIST < <( find .  -name ".git" |  egrep -v '\bpkg\b' | egrep -v '\bdep\b' | sed -e 's%.git$%%g' | sed -e 's%/$%%g' )
     # リスト毎に"$GIT_ID/#*"ブランチを削除する。
-    for GIT_CLONE_DIR in $GIT_CLONE_DIR_LIST
+    for GIT_CLONE_DIR in "${GIT_CLONE_DIR_LIST[@]}"
     do
         local GIT_DEFAULT_BRANCH_NAME=develop
-        SAVED_PWD=$PWD
-        cd ${GIT_CLONE_DIR}
+        SAVED_PWD="$PWD"
+        cd "${GIT_CLONE_DIR}"
         echo "------------------------------"
         echo "----- ${GIT_CLONE_DIR} "
         echo "------------------------------"
@@ -229,7 +237,7 @@ function git-branch-clean-all() {
             fi
         done
         echo ""
-        cd $SAVED_PWD
+        cd "$SAVED_PWD"
     done
 }
 
