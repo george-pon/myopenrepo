@@ -93,14 +93,16 @@ function f-choco-list {
 # vagrant provider指定 (hyperv or virtualbox)
 # 現在Hyper-Vが有効かどうかにしたがって環境変数VAGRANT_DEFAULT_PROVIDERを設定する
 function f-hyperv-check {
-    $RESULT = bcdedit /enum | Select-String "hypervisorlaunchtype"
-    if ( Write-Output $RESULT | Select-String "Auto" ) {
-        # echo "Hyper-V is ON"
-        $env:VAGRANT_DEFAULT_PROVIDER = "hyperv"
-    }
-    if ( Write-Output $RESULT | Select-String "Off" ) {
-        # echo "Hyper-V is OFF"
-        $env:VAGRANT_DEFAULT_PROVIDER = "virtualbox"
+    if ([string]::IsNullOrEmpty($env:VAGRANT_DEFAULT_PROVIDER)) {
+        $RESULT = bcdedit /enum | Select-String "hypervisorlaunchtype"
+        if ( Write-Output $RESULT | Select-String "Auto" ) {
+            # echo "Hyper-V is ON"
+            $env:VAGRANT_DEFAULT_PROVIDER = "hyperv"
+        }
+        if ( Write-Output $RESULT | Select-String "Off" ) {
+            # echo "Hyper-V is OFF"
+            $env:VAGRANT_DEFAULT_PROVIDER = "virtualbox"
+        }
     }
 }
 

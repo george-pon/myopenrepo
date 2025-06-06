@@ -163,17 +163,19 @@ function f-msys-escape() {
 # vagrant provider指定 (hyperv or virtualbox)
 # 現在Hyper-Vが有効かどうかにしたがって環境変数VAGRANT_DEFAULT_PROVIDERを設定する
 function f-hyperv-check() {
-    if type bcdedit 1>/dev/null 2>/dev/null ; then
-        local RESULT=$( bcdedit $( f-msys-escape /enum ) | grep "hypervisorlaunchtype" )
-        local RESULT2=$( echo $RESULT | grep "Auto" )
-        local RESULT3=$( echo $RESULT | grep "Off" )
-        if [ -n  "$RESULT2" ] ; then
-            # echo "Hyper-V is ON"
-            export VAGRANT_DEFAULT_PROVIDER="hyperv"
-        fi
-        if [ -n "$RESULT3" ] ; then
-            # echo "Hyper-V is OFF"
-            export VAGRANT_DEFAULT_PROVIDER="virtualbox"
+    if [ x"$VAGRANT_DEFAULT_PROVIDER"x = x""x ] ; then
+        if type bcdedit 1>/dev/null 2>/dev/null ; then
+            local RESULT=$( bcdedit $( f-msys-escape /enum ) | grep "hypervisorlaunchtype" )
+            local RESULT2=$( echo $RESULT | grep "Auto" )
+            local RESULT3=$( echo $RESULT | grep "Off" )
+            if [ -n  "$RESULT2" ] ; then
+                # echo "Hyper-V is ON"
+                export VAGRANT_DEFAULT_PROVIDER="hyperv"
+            fi
+            if [ -n "$RESULT3" ] ; then
+                # echo "Hyper-V is OFF"
+                export VAGRANT_DEFAULT_PROVIDER="virtualbox"
+            fi
         fi
     fi
 }
