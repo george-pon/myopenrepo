@@ -90,6 +90,22 @@ function f-choco-list {
     # Get-Content ./packages.config
 }
 
+# vagrant provider指定 (hyperv or virtualbox)
+# 現在Hyper-Vが有効かどうかにしたがって環境変数VAGRANT_DEFAULT_PROVIDERを設定する
+function f-hyperv-check {
+    $RESULT = bcdedit /enum | Select-String "hypervisorlaunchtype"
+    if ( Write-Output $RESULT | Select-String "Auto" ) {
+        # echo "Hyper-V is ON"
+        $env:VAGRANT_DEFAULT_PROVIDER = "hyperv"
+    }
+    if ( Write-Output $RESULT | Select-String "Off" ) {
+        # echo "Hyper-V is OFF"
+        $env:VAGRANT_DEFAULT_PROVIDER = "virtualbox"
+    }
+}
+
+# hyperv check 実施
+f-hyperv-check
 
 # 別ウィンドウでminttyを開いてgit bashを起動する
 # 引数があればコマンドと見なして実行する
@@ -852,6 +868,57 @@ function f-grep-r {
     get-childitem -recurse -exclude ".git/" $srcdir  | foreach-object { if ( ! $_.PSIsContainer ) { Write-Output $_.FullName } } | foreach-object { select-string -pattern $pat -path $_ }
 }
 
+# vagrantのディレクトリに移動してから vagrant-ssh 関数を実行する
+# SOCK5環境変数はクリアした上で使用すること。
+# ~/.ssh/known_hostsは適宜クリアしておくこと。
+function f-vagrant-ssh {
+    $sshdata = & vagrant ssh-config
+    $targethost = write-output $sshdata | select-string "Hostname " | foreach-object { $_ -replace "HostName", "" }
+    $targethost = $targethost.Trim()
+    $targetport = write-output $sshdata | select-string "Port " | foreach-object { $_ -replace "Port", "" }
+    $targetport = $targetport.Trim()
+    $targetuser = write-output $sshdata | select-string "User " | foreach-object { $_ -replace "User", "" }
+    $targetuser = $targetuser.Trim()
+    $targetidentfile = write-output $sshdata | select-string "IdentityFile " | foreach-object { $_ -replace "IdentityFile", "" }
+    $targetidentfile = $targetidentfile -replace "/", "\"
+    $targetidentfile = $targetidentfile.Trim()
+    & ssh.exe -i ${targetidentfile}  -p ${targetport} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $targetuser@${targethost}
+}
+
+# 全体ステータス表示
+function f-vagrant-global-status {
+    vagrant global-status --prune
+}
+
+# 全部のvagrantを停止する
+function f-vagrant-poweroff-all {
+    # 開発用ダミーデータ
+    $result = @'
+id       name   provider   state    directory
+----------------------------------------------------------------------------------------
+2d90e47  node2  virtualbox poweroff C:/home/git/vagrant/55-vagrant-freebsd12.0-diskadd
+9f10aee  node1  virtualbox poweroff C:/home/git/vagrant/11_centos_k3s_1node
+4ae0df9  node1  virtualbox running  C:/home/git/vagrant/10_centos_rancher_1node_rke_nfs
+'@
+    # 実際のデータ取得
+    $result = & vagrant global-status
+    # 改行で分割
+    $lines = $result -split ("\n")
+    # 各行でループ
+    Write-Output $lines | foreach-object {
+        Write-Output "$_"
+        $result = $_.trim() -replace "  * ", " "
+        $array = $result -split (' ')
+        $state = $array[3]
+        $vagrantpath = $array[4]
+        if ( $state -eq "running" ) {
+            Write-Output "state is $state , path is $vagrantpath , do vagrant halt"
+            Push-Location $vagrantpath
+            vagrant halt
+            Pop-Location
+        }
+    }
+}
 
 
 # bashのtypeみたいなコマンド
@@ -1291,9 +1358,51 @@ function f-edge-default {
 }
 
 
-#----------------------------------------------------------------------
-# 環境依存部
 #
+# 各種コマンドPATH設定
+#
+
+# add bash.exe and mintty.exe path
+if ( Test-Path "C:\Program Files\Git\bin" ) {
+    f-path-add "C:\Program Files\Git\bin"
+    f-path-add "C:\Program Files\Git\usr\bin"
+}
+
+# add VcXsrv path
+if ( Test-Path "C:\Program Files\VcXsrv" ) {
+    f-path-add "C:\Program Files\VcXsrv"
+}
+
+# Docker Desktop for Windows
+if ( Test-Path "C:\Program Files\Docker\Docker\resources\bin" ) {
+    f-path-prepend "C:\Program Files\Docker\Docker\resources\bin"
+}
+if ( Test-Path "C:\ProgramData\DockerDesktop\version-bin" ) {
+    f-path-prepend "C:\ProgramData\DockerDesktop\version-bin"
+}
+
+# Firefox
+if ( Test-Path "C:\Program Files\Mozilla Firefox" ) {
+    f-path-add "C:\Program Files\Mozilla Firefox"
+}
+
+# Chrome
+if ( Test-Path "C:\Program Files\Google\Chrome\Application" ) {
+    f-path-add "C:\Program Files\Google\Chrome\Application"
+}
+
+# sakura editor
+if ( Test-Path "C:\Program Files (x86)\sakura" ) {
+    f-path-add "C:\Program Files (x86)\sakura"
+}
+
+function f-sakura-memo {
+    $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\${NEW_MEMO_FILE}.txt"
+    sakura.exe $NEW_MEMO_FILE
+}
+
+
 
 #----------------------------------------------------------------------
 # Git 関連ディレクトリ
@@ -1404,7 +1513,6 @@ function cdtest9 {
     $env:HOMEDRIVE
     Set-Location $env:GIT_BASE_DIR\test9\test9
 }
-
 
 
 

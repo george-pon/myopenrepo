@@ -957,6 +957,13 @@ elif [ -d /D/HOME/git/george-pon/vagrant ] ; then
     export VAGRANT_BASE_DIR=/D/HOME/git/george-pon/vagrant
 fi
 
+
+function f-sakura-memo() {
+    NEW_MEMO_FILE=$(date +%Y%m%d_%H%M%S)
+    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/${NEW_MEMO_FILE}.txt"
+    sakura.exe $NEW_MEMO_FILE
+}
+
 #
 # end of file
 #
