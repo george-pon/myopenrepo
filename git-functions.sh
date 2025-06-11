@@ -964,7 +964,11 @@ function git-branch-private-backup-upper-dir() {
         DEST_DIR="../${BASE_PWD}_bkup"
     fi
 
-    if [ ! -f "$FROM" ] ; then
+    if [ -f "$FROM" ] ; then
+        CP_OPT="    "
+    elif [ -d "$FROM" ] ; then
+        CP_OPT=" -r "
+    else
         echo "git-branch-private-backup-upper-dir: $FROM is not a file"
         return 1
     fi
@@ -979,8 +983,8 @@ function git-branch-private-backup-upper-dir() {
     mkdir -p "$DIR"
     RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
 
-    echo cp "$FROM" "$DEST"
-    cp "$FROM" "$DEST"
+    echo cp $CP_OPT "$FROM" "$DEST"
+    cp $CP_OPT "$FROM" "$DEST"
     RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
 }
 
@@ -1003,6 +1007,10 @@ function git-branch-backup-modified-untrack-files() {
     for i in "${MODIFIED_UNTRACK_LIST[@]}"
     do
         if [ -f "$i" ] ; then
+            git-branch-private-backup-upper-dir "$i" "$DEST_DIR"
+            RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
+        fi
+        if [ -d "$i" ] ; then
             git-branch-private-backup-upper-dir "$i" "$DEST_DIR"
             RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
         fi
