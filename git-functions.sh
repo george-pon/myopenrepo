@@ -960,7 +960,8 @@ function git-branch-private-backup-upper-dir() {
     if [ $# -ge 2 ] ; then
         DEST_DIR="$2"
     else
-        DEST_DIR="../$( basename $PWD )_bkup"
+        BASE_PWD=$(basename "$PWD")
+        DEST_DIR="../${BASE_PWD}_bkup"
     fi
 
     if [ ! -f "$FROM" ] ; then
@@ -971,34 +972,35 @@ function git-branch-private-backup-upper-dir() {
     DEST="$DEST_DIR/$FROM"
 
     # echo "DEST is $DEST"
-    DIR=$( dirname $DEST )
+    DIR=$( dirname "$DEST" )
     # echo "DIR is $DIR"
 
     # echo mkdir -p $DIR
-    mkdir -p $DIR
+    mkdir -p "$DIR"
     RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
 
-    echo cp $FROM $DEST
-    cp $FROM $DEST
+    echo cp "$FROM" "$DEST"
+    cp "$FROM" "$DEST"
     RC=$? ; if [ $RC -ne 0 ] ; then echo "ERROR. abort." ; return 1 ; fi
 }
 
 # git status の結果から modified ファイルと untracked ファイルの一覧を取得する
 function git-branch-list-modified-untrack-files() {
-    MODIFIED_LIST=$( f_git status | awk '/modified:/{print $2;}' )
-    UNTRACKED_LIST=$( f_git status | awk '/Untracked/ { F1 = 1; }; ( F1 == 1 ) { print $0; }' | grep -v "Untracked files" | grep -v "to include in what will be committed" | grep -v "no changes added to commit" | grep -v "nothing added to commit" | awk '{print $1}' )
-    for i in $MODIFIED_LIST  $UNTRACKED_LIST
+    mapfile -t MODIFIED_LIST < <( f_git status | awk '/modified:/{print $2;}' )
+    mapfile -t UNTRACKED_LIST < <( f_git status | awk '/Untracked/ { F1 = 1; }; ( F1 == 1 ) { print $0; }' | grep -v "Untracked files" | grep -v "to include in what will be committed" | grep -v "no changes added to commit" | grep -v "nothing added to commit" | awk '{print $1}' )
+    for i in "${MODIFIED_LIST[@]}" "${UNTRACKED_LIST[@]}"
     do
-        echo $i
+        echo "$i"
     done
 }
 
 # 一つ上のディレクトリに modified ファイルと untrack ファイルをコピーして保存する
 function git-branch-backup-modified-untrack-files() {
-    MODIFIED_UNTRACK_LIST=$( git-branch-list-modified-untrack-files )
+    mapfile -t MODIFIED_UNTRACK_LIST < <( git-branch-list-modified-untrack-files )
     YMD_HMS=$( date +%Y%m%d_%H%M%S)
-    DEST_DIR="../$( basename $PWD )_bkup_${YMD_HMS}"
-    for i in $MODIFIED_UNTRACK_LIST
+    BASE_PWD=$(basename "$PWD")
+    DEST_DIR="../${BASE_PWD}_bkup_${YMD_HMS}"
+    for i in "${MODIFIED_UNTRACK_LIST[@]}"
     do
         if [ -f "$i" ] ; then
             git-branch-private-backup-upper-dir "$i" "$DEST_DIR"
