@@ -991,8 +991,9 @@ function git-branch-private-backup-upper-dir() {
 # git status の結果から modified ファイルと untracked ファイルの一覧を取得する
 function git-branch-list-modified-untrack-files() {
     mapfile -t MODIFIED_LIST < <( f_git status | awk '/modified:/{print $2;}' )
+    mapfile -t NEW_FILE_LIST < <( f_git status | awk '/new file:/{print $3;}' )
     mapfile -t UNTRACKED_LIST < <( f_git status | awk '/Untracked/ { F1 = 1; }; ( F1 == 1 ) { print $0; }' | grep -v "Untracked files" | grep -v "to include in what will be committed" | grep -v "no changes added to commit" | grep -v "nothing added to commit" | awk '{print $1}' )
-    for i in "${MODIFIED_LIST[@]}" "${UNTRACKED_LIST[@]}"
+    for i in "${MODIFIED_LIST[@]}" "${NEW_FILE_LIST[@]}" "${UNTRACKED_LIST[@]}"
     do
         echo "$i"
     done
