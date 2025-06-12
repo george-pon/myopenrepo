@@ -962,8 +962,14 @@ fi
 
 function f-sakura-memo() {
     NEW_MEMO_FILE=$(date +%Y%m%d_%H%M%S)
-    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/${NEW_MEMO_FILE}.txt"
-    sakura.exe $NEW_MEMO_FILE
+    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}.txt"
+    sakura.exe $NEW_MEMO_FILE &
+}
+
+function f-code-memo() {
+    NEW_MEMO_FILE=$(date +%Y%m%d_%H%M%S)
+    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}.txt"
+    code $NEW_MEMO_FILE &
 }
 
 #
