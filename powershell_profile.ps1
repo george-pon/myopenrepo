@@ -1412,13 +1412,13 @@ if ( Test-Path "C:\Program Files (x86)\sakura" ) {
 function f-sakura-memo {
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
     $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}.txt"
-    sakura.exe $NEW_MEMO_FILE
+    sakura.exe "$NEW_MEMO_FILE"
 }
 
 function f-code-memo {
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
     $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}.txt"
-    code $NEW_MEMO_FILE
+    code "$NEW_MEMO_FILE"
 }
 
 
