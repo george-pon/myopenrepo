@@ -232,6 +232,7 @@ function f-msys-bash-via-winpty {
 # msys64のbashを起動。paste動作確認用。貼り付け時に少し待ってEnterの入力が必要だがpaste入力は安定する。
 # mintty の設定ファイルは、 /etc/minttyrc, $APPDATA/mintty/config, ~/.config/mintty/config, ~/.minttyrc, の順に検索する。
 # ~/.minttyrc をコピーして、 .minttyrc-utf8 を作成する。
+# 環境変数 F_MSYS_BASH_FONT_HEIGHT が定義されていればその値を使う
 function f-msys-bash {
     $env:HOME = $HOME
     $env:MSYS = "nocase"
@@ -243,11 +244,16 @@ function f-msys-bash {
     if ( Test-Path $mintty_config_file ) {
         Remove-Item $mintty_config_file
     }
+    # font height
+    $font_height = "12"
+    if ( $env:F_MSYS_BASH_FONT_HEIGHT -ne "" ) {
+        $font_height = $env:F_MSYS_BASH_FONT_HEIGHT
+    }
     Write-Output "BoldAsFont=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Ricty Diminished" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "FontHeight=12" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "FontHeight=$font_height" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "RightClickAction=paste" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -291,11 +297,16 @@ function f-msys-bash-sjis {
     if ( Test-Path $mintty_config_file ) {
         Remove-Item $mintty_config_file
     }
+    # font height
+    $font_height = "12"
+    if ( $env:F_MSYS_BASH_FONT_HEIGHT -ne "" ) {
+        $font_height = $env:F_MSYS_BASH_FONT_HEIGHT
+    }
     Write-Output "BoldAsFont=no" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Ricty Diminished" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "# Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "FontHeight=12" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "FontHeight=$font_height" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "RightClickAction=paste" | Add-Content -Encoding UTF8 "${mintty_config_file}"

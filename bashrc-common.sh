@@ -229,13 +229,19 @@ function f-msys-bash() {
     #     fi
     # fi
 
+    # check font height
+    font_height="12"
+    if [ -n "$F_MSYS_BASH_FONT_HEIGHT" ] ; then
+        font_height="$F_MSYS_BASH_FONT_HEIGHT"
+    fi
+
     # mintty config file 作成
     mintty_config_file="${HOME}/.minttyrc-utf8"
     echo "BoldAsFont=no" > $mintty_config_file
     echo "# Font=Ricty Diminished" >> $mintty_config_file
-    echo "# Font=Consolas" >> $mintty_config_file
-    echo "Font=Cascadia Mono" >> $mintty_config_file
-    echo "FontHeight=12" >> $mintty_config_file
+    echo "# Font=Cascadia Mono" >> $mintty_config_file
+    echo "Font=Consolas" >> $mintty_config_file
+    echo "FontHeight=$font_height" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
     echo "Rows=28" >> $mintty_config_file
     echo "RightClickAction=paste" >> $mintty_config_file
@@ -283,13 +289,19 @@ function f-msys-bash-sjis() {
     #     fi
     # fi
 
+    # check font height
+    font_height="12"
+    if [ -n "$F_MSYS_BASH_FONT_HEIGHT" ] ; then
+        font_height="$F_MSYS_BASH_FONT_HEIGHT"
+    fi
+
     # mintty config file 作成
     mintty_config_file="${HOME}/.minttyrc-sjis"
     echo "BoldAsFont=no" > $mintty_config_file
     echo "# Font=Ricty Diminished" >> $mintty_config_file
-    echo "# Font=Consolas" >> $mintty_config_file
-    echo "Font=Cascadia Mono" >> $mintty_config_file
-    echo "FontHeight=12" >> $mintty_config_file
+    echo "# Font=Cascadia Mono" >> $mintty_config_file
+    echo "Font=Consolas" >> $mintty_config_file
+    echo "FontHeight=$font_height" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
     echo "Rows=28" >> $mintty_config_file
     echo "RightClickAction=paste" >> $mintty_config_file
