@@ -1001,10 +1001,21 @@ function git-branch-list-modified-untrack-files() {
 
 # 一つ上のディレクトリに modified ファイルと untrack ファイルをコピーして保存する
 function git-branch-backup-modified-untrack-files() {
+    # 引数処理
+    append_name=""
+    while [ $# -gt 0 ]
+    do
+        arg1="$1"
+        shift
+        if [ x"$arg1"x = x"-n"x ] ; then
+            append_name="_$1"
+            shift
+        fi
+    done
     mapfile -t MODIFIED_UNTRACK_LIST < <( git-branch-list-modified-untrack-files )
     YMD_HMS=$( date +%Y%m%d_%H%M%S)
     BASE_PWD=$(basename "$PWD")
-    DEST_DIR="../${BASE_PWD}_bkup_${YMD_HMS}"
+    DEST_DIR="../${BASE_PWD}_bkup_${YMD_HMS}${append_name}"
     for i in "${MODIFIED_UNTRACK_LIST[@]}"
     do
         if [ -f "$i" ] ; then
