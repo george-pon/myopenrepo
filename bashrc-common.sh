@@ -973,14 +973,34 @@ fi
 
 
 function f-sakura-memo() {
+    NEW_MEMO_APPEND=""
+    while [ $# -gt 0 ]
+    do
+        arg1="$1"
+        shift
+        if [ x"$arg1"x = x"-n"x ] ; then
+            NEW_MEMO_APPEND="_$1"
+            shift
+        fi
+    done
     NEW_MEMO_FILE=$(date +%Y%m%d_%H%M%S)
-    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}.txt"
+    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}${NEW_MEMO_APPEND}.txt"
     sakura.exe "$NEW_MEMO_FILE" &
 }
 
 function f-code-memo() {
+    NEW_MEMO_APPEND=""
+    while [ $# -gt 0 ]
+    do
+        arg1="$1"
+        shift
+        if [ x"$arg1"x = x"-n"x ] ; then
+            NEW_MEMO_APPEND="_$1"
+            shift
+        fi
+    done
     NEW_MEMO_FILE=$(date +%Y%m%d_%H%M%S)
-    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}.txt"
+    NEW_MEMO_FILE="$PERSONAL_BASE_DIR/Memo_${NEW_MEMO_FILE}${NEW_MEMO_APPEND}.txt"
     code "$NEW_MEMO_FILE" &
 }
 
