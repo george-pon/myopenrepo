@@ -1410,14 +1410,32 @@ if ( Test-Path "C:\Program Files (x86)\sakura" ) {
 }
 
 function f-sakura-memo {
+    # 引数チェック
+    $NEW_SUFFIX = ""
+    while ( $args.Length -gt 0 ) {
+        $arg1, $args = $args
+        if ( $arg1 -eq "-n" ) {
+            $arg2, $args = $args
+            $NEW_SUFFIX = "_$arg2"
+        }
+    }
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}.txt"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.txt"
     sakura.exe "$NEW_MEMO_FILE"
 }
 
 function f-code-memo {
+    # 引数チェック
+    $NEW_SUFFIX = ""
+    while ( $args.Length -gt 0 ) {
+        $arg1, $args = $args
+        if ( $arg1 -eq "-n" ) {
+            $arg2, $args = $args
+            $NEW_SUFFIX = "_$arg2"
+        }
+    }
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}.txt"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.txt"
     code "$NEW_MEMO_FILE"
 }
 
