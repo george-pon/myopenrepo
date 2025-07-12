@@ -581,6 +581,63 @@ function f-path-show() {
 }
 
 #
+# ランダム生成
+#
+
+# 第一引数の文字列から第二引数の回数だけランダムに文字を選択して表示する
+function f-random-select() {
+    source="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"  # 任意の文字列をここに指定
+    length=16
+    result=""
+    if [ $# -ge 1 ] ; then
+        source=$1
+    fi
+    if [ $# -ge 2 ] ; then
+        length=$2
+    fi
+
+    for ((i = 0; i < length; i++));
+    do
+        rand_index=$((RANDOM % ${#source}))
+        result+="${source:$rand_index:1}"
+    done
+
+    echo "$result"
+}
+
+
+
+# ランダム文字列を生成する
+# O と 0 と o は除外
+# 1 と l は除外
+# 8 と B は除外
+# ACDEFGHIJKLMNPQRSTUVWXYZ
+# abcdefghijkmnpqrstuvwxyz
+# 2345679
+function f-random-string-generate() {
+    FROM1_STR=""
+    FROM1_STR="${FROM1_STR}ACDEFGHIJKLMNPQRSTUVWXYZ"
+    FROM2_STR=""
+    FROM2_STR="${FROM2_STR}abcdefghijkmnpqrstuvwxyz"
+    FROM3_STR=""
+    FROM3_STR="${FROM3_STR}2345679"
+    FROM4_STR=""
+    FROM4_STR="${FROM4_STR}${FROM1_STR}"
+    FROM4_STR="${FROM4_STR}${FROM2_STR}"
+    FROM4_STR="${FROM4_STR}${FROM3_STR}"
+    result=""
+    # ランダムに16文字を選択
+    result="$result$( f-random-select $FROM2_STR 2 )"
+    result="$result$( f-random-select $FROM1_STR 2 )"
+    result="$result$( f-random-select $FROM2_STR 4 )"
+    result="$result$( f-random-select $FROM3_STR 4 )"
+    result="$result$( f-random-select $FROM4_STR 16 )"
+    echo $result
+}
+
+
+
+#
 # azure cli 設定
 #
 

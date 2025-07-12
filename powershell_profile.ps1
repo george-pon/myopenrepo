@@ -276,7 +276,9 @@ function f-msys-bash {
     $old_lang = "$env:LANG"
     $env:LANG = "ja_JP.UTF-8"
     if ( $args.Length -eq 0 ) {
-        & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"  "/usr/bin/winpty" "/usr/bin/bash" "--login" "-i"
+        # 2025.07.10 winpty を経由すると、 Ctrl-C が入力できない。。。
+        # & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"  "/usr/bin/winpty" "/usr/bin/bash" "--login" "-i"
+        & $MSYS_MINTTY --config "${mintty_config_file}" "--exec"   "/usr/bin/bash" "--login" "-i"
     }
     else {
         # & "C:\Program Files\Git\usr\bin\mintty.exe" --config "${mintty_config_file}"  "/usr/bin/bash"  "--login"  "-c"  "$args"
@@ -1179,12 +1181,32 @@ function f-edit-profile {
 }
 
 
-# 16桁のパスワードを生成する
-function f-generate-password {
-    (1..16) | ForEach-Object {
-        $str = -join ((1..16) | ForEach-Object { Get-Random -input ([char[]]((48..57) + (65..90) + (97..122))) })
-        Write-Output $str
-    }
+# ランダム文字列を生成する
+# O と 0 と o は除外
+# 1 と l は除外
+# 8 と B は除外
+# ACDEFGHIJKLMNPQRSTUVWXYZ
+# abcdefghijkmnpqrstuvwxyz
+# 2345679
+function f-random-string-generate {
+    $FROM1_STR = ""
+    $FROM1_STR = $FROM1_STR + "ACDEFGHIJKLMNPQRSTUVWXYZ"
+    $FROM2_STR = ""
+    $FROM2_STR = $FROM2_STR + "abcdefghijkmnpqrstuvwxyz"
+    $FROM3_STR = ""
+    $FROM3_STR = $FROM3_STR + "2345679"
+    $FROM4_STR = ""
+    $FROM4_STR = $FROM4_STR + $FROM1_STR
+    $FROM4_STR = $FROM4_STR + $FROM2_STR
+    $FROM4_STR = $FROM4_STR + $FROM3_STR
+    # ランダムに16文字を選択
+    $random = ""
+    $random = $random + -join ((0..($FROM2_STR.Length - 1) | Get-Random -Count 2) | ForEach-Object { $FROM2_STR[$_] })
+    $random = $random + -join ((0..($FROM1_STR.Length - 1) | Get-Random -Count 2) | ForEach-Object { $FROM1_STR[$_] })
+    $random = $random + -join ((0..($FROM2_STR.Length - 1) | Get-Random -Count 4) | ForEach-Object { $FROM2_STR[$_] })
+    $random = $random + -join ((0..($FROM3_STR.Length - 1) | Get-Random -Count 4) | ForEach-Object { $FROM3_STR[$_] })
+    $random = $random + -join ((0..($FROM4_STR.Length - 1) | Get-Random -Count 16) | ForEach-Object { $FROM4_STR[$_] })
+    echo $random
 }
 
 
