@@ -1461,6 +1461,10 @@ function f-code-memo {
     code "$NEW_MEMO_FILE"
 }
 
+# listen port 表示
+function f-netstat-listen {
+    netstat -ant | Select-String -Pattern "TCP" | Select-String -Pattern "LISTENING"
+}
 
 
 #----------------------------------------------------------------------
@@ -1511,6 +1515,11 @@ function cdappdata {
 function cdgit {
     $env:HOMEDRIVE
     Set-Location $env:GIT_BASE_DIR
+}
+
+function cdgitmy {
+    $env:HOMEDRIVE
+    Set-Location $env:GIT_BASE_DIR\george-pon
 }
 
 function cdgit-george-pon {
