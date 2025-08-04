@@ -1029,6 +1029,17 @@ elif [ -d /D/HOME/git/george-pon/vagrant ] ; then
 fi
 
 
+function f-sakura-grep() {
+    searchStr="$1"
+    if [ $# -ge 2 ] ; then
+        ext="$2"
+    else
+        ext="*"
+    fi
+    dir="."
+    sakura.exe -GREPMODE -GKEY="$searchStr" -GFILE="*.$ext" -GFOLDER="$dir" -GOPT="SP" -GCODE=99
+}
+
 function f-sakura-memo() {
     NEW_MEMO_APPEND=""
     while [ $# -gt 0 ]

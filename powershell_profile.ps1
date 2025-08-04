@@ -1431,6 +1431,16 @@ if ( Test-Path "C:\Program Files (x86)\sakura" ) {
     f-path-add "C:\Program Files (x86)\sakura"
 }
 
+function f-sakura-grep() {
+    $searchStr, $args = $args
+    $ext = "*"
+    if ( $args.Length -gt 0 ) {
+        $ext, $args = $args
+    }
+    $dir = "."
+    sakura.exe -GREPMODE -GKEY="$searchStr" -GFILE="*.$ext" -GFOLDER="$dir" -GOPT="SP" -GCODE=99
+}
+
 function f-sakura-memo {
     # 引数チェック
     $NEW_SUFFIX = ""
