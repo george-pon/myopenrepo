@@ -40,13 +40,13 @@ if ( Test-Path "$env:GIT_BASE_DIR\george-pon" ) {
 
 # read my setup
 if ( Test-Path "$env:GIT_GEORGE_PON_DIR\mytools" ) {
-    . "$env:GIT_GEORGE_PON_DIR\mytools\powershell_profile.ps1"
+    . "$env:GIT_GEORGE_PON_DIR\mytools\powershell_profile_common.ps1"
     . "$env:GIT_GEORGE_PON_DIR\mytools\git-functions.ps1"
     . "$env:GIT_GEORGE_PON_DIR\mytools\docker-functions.ps1"
     . "$env:GIT_GEORGE_PON_DIR\mytools\kubernetes-functions.ps1"
 }
 elseif ( Test-Path "$env:GIT_GEORGE_PON_DIR\myopenrepo" ) {
-    . "$env:GIT_GEORGE_PON_DIR\myopenrepo\powershell_profile.ps1"
+    . "$env:GIT_GEORGE_PON_DIR\myopenrepo\powershell_profile_common.ps1"
     . "$env:GIT_GEORGE_PON_DIR\myopenrepo\git-functions.ps1"
 }
 
@@ -61,8 +61,8 @@ if ( Test-Path "$env:GIT_GEORGE_PON_DIR\myopenrepo" ) {
 }
 
 # maven path 追加
-if ( Test-Path "C:/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3/bin" ) {
-    f-path-add "C:/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3/bin"
+if ( Test-Path "C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.11\bin" ) {
+    f-path-add "C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.11\bin"
 }
 
 # add bash.exe and mintty.exe path
