@@ -130,6 +130,11 @@ function f-edit-profile {
     & winmergeu.exe  $HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1  $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 }
 
+# vs code 用の profile を編集する
+function f-edit-profile-vscode {
+    & winmergeu.exe  $HOME\Documents\PowerShell\Microsoft.VSCode_profile.ps1  $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+}
+
 # .bashrc のサンプルを更新する
 function f-edit-bashrc-sample {
     & winmergeu.exe $HOME\.bashrc    $env:GIT_GEORGE_PON_DIR/mytools/sample-bashrc.sh
