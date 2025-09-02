@@ -11,7 +11,7 @@ import openpyxl
 def search_in_all_sheets(file_path, search_text):
     # Excelファイルを読み込む
     print(f"reading ... {file_path}")
-    wb = openpyxl.load_workbook(file_path)
+    wb = openpyxl.load_workbook(file_path, data_only=True)
 
     results = []
 
