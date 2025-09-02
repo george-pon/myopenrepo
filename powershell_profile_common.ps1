@@ -698,6 +698,8 @@ function f-sudo-pwsh {
 #
 # Windows Terminal
 #
+# 使い方サンプル : f-windows-terminal pwsh.exe "$env:GIT_GEORGE_PON_DIR\myopenrepo\furufuru.ps1"
+#
 function f-windows-terminal {
     if ( $args.Length -eq 0 ) {
         wt.exe new-tab --startingDirectory "$PWD"
