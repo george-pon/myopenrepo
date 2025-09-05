@@ -1454,7 +1454,7 @@ function f-sakura-memo {
         }
     }
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.txt"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
     sakura.exe "$NEW_MEMO_FILE"
 }
 
@@ -1469,7 +1469,7 @@ function f-code-memo {
         }
     }
     $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.txt"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
     code "$NEW_MEMO_FILE"
 }
 
