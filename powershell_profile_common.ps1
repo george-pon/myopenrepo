@@ -909,6 +909,13 @@ function f-vagrant-global-status {
 
 # 全部のvagrantを停止する
 function f-vagrant-poweroff-all {
+    # vagrantコマンドチェック
+    if ( f-type-silent vagrant ) {
+        write-host "vagrant command found."
+    }
+    else {
+        return
+    }
     # 開発用ダミーデータ
     $result = @'
 id       name   provider   state    directory
@@ -1040,6 +1047,7 @@ function f-windows-wait-cpu-ready {
 #
 # mkdir -p 相当
 #
+# New-Item ".\path\to\dir" -ItemType Directory -ErrorAction SilentlyContinue でも良いらしい
 function f-mkdir {
     # 引数補正
     if ( $args.gettype().name -eq "Object[]" ) {
@@ -1097,6 +1105,52 @@ function f-rm-rf-force {
             }
         }
     }
+}
+
+#
+# ファイルの中の文字列を置換する
+#
+#  f-sed  from_str  to_str  filename
+#
+# Get-Contentの部分のカッコは必要。
+#
+function f-sed {
+    # 引数補正
+    if ( $args.gettype().name -eq "Object[]" ) {
+        if ( $args.length -ge 1 ) {
+            if ( $args[0].gettype().name -eq "Object[]" ) {
+                $args = $args[0]
+            }
+        }
+    }
+
+    # 引数チェック
+    if ( $args.length -lt 3) {
+        write-host "f-sed from_str to_str filename"
+        return
+    }
+
+    # 引数解析
+    $count = 0
+    while ( $args.length -gt 0 ) {
+        $arg1, $args = $args
+        $count = $count + 1
+        if ( $count -eq 1 ) {
+            $FROMSTR = $arg1
+        }
+        elseif ( $count -eq 2 ) {
+            $TOSTR = $arg1
+        }
+        elseif ( $count -eq 3 ) {
+            $TARGET = $arg1
+        }
+    }
+
+    $ENCODING = "UTF8"
+    (Get-Content $TARGET -Encoding $ENCODING) | `
+        foreach { $_ -replace $FROMSTR, $TOSTR } | `
+        Set-Content $TARGET -Encoding $ENCODING
+
 }
 
 
@@ -1392,6 +1446,30 @@ function f-edge-prof-n {
 function f-edge-default {
     Set-Location "C:\Program Files (x86)\Microsoft\Edge\Application"
     & .\msedge.exe --profile-directory=Default
+}
+
+# kjwikigdocker.war ファイルの dataStorePath を書き換えて tomcat ディレクトリにコピーする
+function f-kjwikigdocker-edit-war {
+    if ( ! ( Test-Path "kjwikigdocker.war" ) ) {
+        write-host "kjwikigdocker.war file not found. abort."
+        return 1
+    }
+
+    Copy-Item kjwikigdocker.war kjwikigdocker.zip
+    if ( ! ( Test-Path "tmpwork" ) ) {
+        mkdir -p tmpwork
+    }
+    Push-Location tmpwork
+    unzip ..\kjwikigdocker.zip WEB-INF/classes/kjwikig.properties
+    f-sed "authenticationMode=AuthenticationModeMay" "authenticationMode=AuthenticationModeMust"  .\WEB-INF\classes\kjwikig.properties
+    f-sed "dataStorePath=/var/lib/kjwikigdocker" "dataStorePath=C:\\var\\lib\\kjwikigdocker"  .\WEB-INF\classes\kjwikig.properties
+    zip -u ..\kjwikigdocker.zip .\WEB-INF\classes\kjwikig.properties
+    Pop-Location
+
+    Copy-Item kjwikigdocker.zip "C:\Program Files\Apache Software Foundation\Tomcat 10.1\webapps\kjwikigdocker.war"
+
+    Remove-Item -Recurse tmpwork
+    Remove-Item kjwikigdocker.zip
 }
 
 
