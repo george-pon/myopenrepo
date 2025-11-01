@@ -243,7 +243,7 @@ function f-msys-bash() {
     echo "Font=Consolas" >> $mintty_config_file
     echo "FontHeight=$font_height" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
-    echo "Rows=28" >> $mintty_config_file
+    echo "Rows=30" >> $mintty_config_file
     echo "RightClickAction=paste" >> $mintty_config_file
     echo "Transparency=low" >> $mintty_config_file
     echo "CursorType=block" >> $mintty_config_file
@@ -303,7 +303,7 @@ function f-msys-bash-sjis() {
     echo "Font=Consolas" >> $mintty_config_file
     echo "FontHeight=$font_height" >> $mintty_config_file
     echo "Columns=120" >> $mintty_config_file
-    echo "Rows=28" >> $mintty_config_file
+    echo "Rows=30" >> $mintty_config_file
     echo "RightClickAction=paste" >> $mintty_config_file
     echo "Transparency=low" >> $mintty_config_file
     echo "CursorType=block" >> $mintty_config_file

@@ -124,7 +124,7 @@ function f-git-bash {
     Write-Output "Font=Cascadia Mono" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "FontHeight=12" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Rows=30" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "RightClickAction=paste" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Transparency=low" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "CursorType=block" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -255,7 +255,7 @@ function f-msys-bash {
     Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "FontHeight=$font_height" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Rows=30" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "RightClickAction=paste" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Transparency=low" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "CursorType=block" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -310,7 +310,7 @@ function f-msys-bash-sjis {
     Write-Output "Font=Consolas" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "FontHeight=$font_height" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Columns=120" | Add-Content -Encoding UTF8 "${mintty_config_file}"
-    Write-Output "Rows=28" | Add-Content -Encoding UTF8 "${mintty_config_file}"
+    Write-Output "Rows=30" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "RightClickAction=paste" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "Transparency=low" | Add-Content -Encoding UTF8 "${mintty_config_file}"
     Write-Output "CursorType=block" | Add-Content -Encoding UTF8 "${mintty_config_file}"
@@ -1509,6 +1509,11 @@ if ( Test-Path "C:\Program Files\Google\Chrome\Application" ) {
 # sakura editor
 if ( Test-Path "C:\Program Files (x86)\sakura" ) {
     f-path-add "C:\Program Files (x86)\sakura"
+}
+
+# rapture
+if ( Test-Path "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1" ) {
+    f-path-add "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1"
 }
 
 function f-sakura-grep() {
