@@ -1561,6 +1561,33 @@ function f-netstat-listen {
     netstat -ant | Select-String -Pattern "TCP" | Select-String -Pattern "LISTENING"
 }
 
+#
+# nvm (node runtime version 切り替えツール関連)
+#
+
+# 現在の node version LTS
+$env:NVM_USE_VERSION = "24.11.1"
+
+# nvm インストール可能なversion一覧表示
+function f-nvm-list-available {
+    write-host ""
+    write-host ""
+    write-host "利用可能な node version"
+    nvm list available
+    write-host ""
+    write-host ""
+    write-host "インストール済み node version"
+    nvm list
+}
+
+
+function f-nvm-install {
+    nvm install $env:NVM_USE_VERSION
+}
+
+function f-nvm-use {
+    nvm use $env:NVM_USE_VERSION
+}
 
 #----------------------------------------------------------------------
 # Git 関連ディレクトリ

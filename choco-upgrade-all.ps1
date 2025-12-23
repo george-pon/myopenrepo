@@ -22,13 +22,17 @@
 f-vagrant-poweroff-all
 
 # WSLも止める
-wsl.exe --shutdown
+if ( f-type-silent wsl.exe ) {
+    wsl.exe --shutdown
+}
 
 # アップデート用コマンド  (virtualboxは除く)
 # choco upgrade -y  all  --except="'virtualbox'"
 
 # アップデート用コマンド (全部)
-choco upgrade -y  all
+if ( f-type-silent choco ) {
+    choco upgrade -y  all
+}
 
 # アップデート用コマンド (全部)（プロキシ設定無視）
 # choco upgrade -y  all --proxy=
