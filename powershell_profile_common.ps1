@@ -1523,6 +1523,53 @@ if ( Test-Path "C:\Program Files (x86)\sakura" ) {
     f-path-add "C:\Program Files (x86)\sakura"
 }
 
+# maven path 追加
+if ( Test-Path "C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.11\bin" ) {
+    f-path-add "C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.11\bin"
+}
+
+# add bash.exe and mintty.exe path
+if ( Test-Path "C:\Program Files\Git\bin" ) {
+    f-path-add "C:\Program Files\Git\bin"
+    f-path-add "C:\Program Files\Git\usr\bin"
+}
+
+# add VcXsrv path
+if ( Test-Path "C:\Program Files\VcXsrv" ) {
+    f-path-add "C:\Program Files\VcXsrv"
+}
+
+# Docker Desktop for Windows
+if ( Test-Path "C:\Program Files\Docker\Docker\resources\bin" ) {
+    f-path-prepend "C:\Program Files\Docker\Docker\resources\bin"
+}
+if ( Test-Path "C:\ProgramData\DockerDesktop\version-bin" ) {
+    f-path-prepend "C:\ProgramData\DockerDesktop\version-bin"
+}
+
+# Firefox
+if ( Test-Path "C:\Program Files\Mozilla Firefox" ) {
+    f-path-add "C:\Program Files\Mozilla Firefox"
+}
+
+# Chrome
+if ( Test-Path "C:\Program Files\Google\Chrome\Application" ) {
+    f-path-add "C:\Program Files\Google\Chrome\Application"
+}
+
+# sakura editor
+if ( Test-Path "C:\Program Files (x86)\sakura" ) {
+    f-path-add "C:\Program Files (x86)\sakura"
+}
+
+# winmerge
+if ( Test-Path "C:\Program Files\WinMerge" ) {
+    f-path-add "C:\Program Files\WinMerge"
+}
+if ( Test-Path "$HOME\AppData\Local\Programs\WinMerge" ) {
+    f-path-add "$HOME\AppData\Local\Programs\WinMerge"
+}
+
 # rapture
 if ( Test-Path "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1" ) {
     f-path-add "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1"
