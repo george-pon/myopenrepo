@@ -987,6 +987,18 @@ function f-write-to-text-file-utf8 {
 }
 
 
+# BOMなしUTF-8テキストファイル(LF)をカレントディレクトリに作成する
+# $textにヒアドキュメント @' ～ '@ で複数行のテキスト内容を設定。
+# # ヒアドキュメントで設定した文字列の改行コードはLFになる。
+# f-write-to-text-file-utf8  sample.txt  $text
+function f-write-to-text-file-utf8-lf {
+    $file, $text = $args
+    $dir = Get-Location
+    $outfile = $dir.tostring() + '\' + $file
+    [IO.File]::WriteAllLines($outfile, $text);
+}
+
+
 # BOMなしUTF-8テキストファイル(CRLF)をカレントディレクトリに作成する
 # $textにヒアドキュメント @' ～ '@ で複数行のテキスト内容を設定。
 # ヒアドキュメントで設定した文字列の改行コードはLFになるようなので、string[]に変換する。

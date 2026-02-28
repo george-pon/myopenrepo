@@ -943,14 +943,14 @@ fi
 # see tomcat log
 function f-tomcat-log-less() {
     TODAY=$( date "+%Y-%m-%d" )
-    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 10.1/logs/catalina.${TODAY}.log"
+    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 11.0/logs/catalina.${TODAY}.log"
     less -F "$LOGFILE"
 }
 
 # see tomcat log
 function f-tomcat-log-tail() {
     TODAY=$( date "+%Y-%m-%d" )
-    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 10.1/logs/catalina.${TODAY}.log"
+    LOGFILE="/c/Program Files/Apache Software Foundation/Tomcat 11.0/logs/catalina.${TODAY}.log"
     tail -f "$LOGFILE"
 }
 

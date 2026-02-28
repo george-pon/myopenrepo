@@ -99,6 +99,14 @@ if ( Test-Path "C:\Program Files (x86)\sakura" ) {
     f-path-add "C:\Program Files (x86)\sakura"
 }
 
+# winmerge
+if ( Test-Path "C:\Program Files\WinMerge" ) {
+    f-path-add "C:\Program Files\WinMerge"
+}
+if ( Test-Path "$HOME\AppData\Local\Programs\WinMerge" ) {
+    f-path-add "$HOME\AppData\Local\Programs\WinMerge"
+}
+
 # prepend bash.exe and mintty.exe path for git for windows SDK
 # if ( Test-Path "C:\home\01-desktop-tools\git-for-windows-sdk\usr\bin" ) {
 # $env:PATH = "C:\home\01-desktop-tools\git-for-windows-sdk\usr\bin" + ";" + $env:Path
@@ -147,7 +155,7 @@ function f-edit-powershell-profile-sample {
 
 function cdtomcat {
     C:
-    Set-Location "\Program Files\Apache Software Foundation\Tomcat 10.1"
+    Set-Location "\Program Files\Apache Software Foundation\Tomcat 11.0"
 }
 
 
