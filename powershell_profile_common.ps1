@@ -1423,9 +1423,41 @@ function f-invoke-webrequest {
     Copy-Item "$outfile" "$cache_file_name"
 }
 
-function f-winget-upgrade-all {
-    winget upgrade --all
+
+# awkのように、文字列を空白で区切って配列を作って返却する
+function f-awk-like-split-space {
+
+    # 引数補正 外部から$argsを渡された場合
+    if ( $args.gettype().name -eq "Object[]" ) {
+        if ( $args.length -ge 1 ) {
+            if ( $args[0].gettype().name -eq "Object[]" ) {
+                $args = $args[0]
+            }
+        }
+    }
+
+    # 結果格納配列
+    $resultArray = @()
+
+    # 引数解析
+    while ( $args.length -gt 0 ) {
+
+        # get first arg and shift
+        $a1, $args = $args;
+        $a2, $rest = $args;
+
+        if ( $a1 -eq "--help" ) {
+            write-host "f-awk-like-split-space abc def ghi"
+            return 0
+        }
+        else {
+            $resultArray += ($a1 -split "[\s]+")
+        }
+    }
+
+    return $resultArray
 }
+
 
 #
 # python の venv の初期化
@@ -1647,6 +1679,27 @@ function f-nvm-install {
 function f-nvm-use {
     nvm use $env:NVM_USE_VERSION
 }
+
+# ディスクのお掃除を行う
+function f-disk-clean {
+
+    # clean npm cache
+    if ( f-type-silent npm ) {
+        npm cache clean --force
+    }
+
+    # clean pip cache
+    if ( f-type-silent pip ) {
+        pip cache purge
+    }
+
+    # clean chocolatey cache
+    if ( f-type-silent choco ) {
+        choco cache remove --expired
+    }
+
+}
+
 
 #----------------------------------------------------------------------
 # Git 関連ディレクトリ
