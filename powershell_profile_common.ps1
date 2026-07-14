@@ -1327,10 +1327,13 @@ function f-event-log {
     Get-EventLog "Windows PowerShell" -newest 15
 }
 
+
+# hostsの表示
 function f-cat-hosts {
     Get-Content "c:\Windows\System32\drivers\etc\hosts"
 }
 
+# キャッシュ付きの invoke webrequest
 function f-invoke-webrequest {
     # キャッシュ付き invoke webrequest
 
@@ -1456,6 +1459,33 @@ function f-awk-like-split-space {
     }
 
     return $resultArray
+}
+
+#
+# decode url
+#
+function f-decode-url {
+    # System.Webアセンブリをロード (PowerShell 5.1以前の場合)
+    # PowerShell Core (6.x以降)では不要
+    Add-Type -AssemblyName System.Web
+
+    # 引数補正
+    if ( $args.gettype().name -eq "Object[]" ) {
+        if ( $args.length -ge 1 ) {
+            if ( $args[0].gettype().name -eq "Object[]" ) {
+                $args = $args[0]
+            }
+        }
+    }
+
+    while ( $args.length -gt 0 ) {
+        # get first arg and shift
+        $a1, $args = $args
+
+        $decodedUrl = [System.Web.HttpUtility]::UrlDecode($a1)
+
+        Write-Host "$decodedUrl"
+    }
 }
 
 
@@ -1681,20 +1711,23 @@ function f-nvm-use {
 }
 
 # ディスクのお掃除を行う
-function f-disk-clean {
+function f-disk-cache-clean {
 
     # clean npm cache
     if ( f-type-silent npm ) {
+        write-host "npm cache clean --force"
         npm cache clean --force
     }
 
     # clean pip cache
     if ( f-type-silent pip ) {
+        write-host "pip cache purge"
         pip cache purge
     }
 
     # clean chocolatey cache
     if ( f-type-silent choco ) {
+        write-host "choco cache remove --expired"
         choco cache remove --expired
     }
 
