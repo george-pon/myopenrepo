@@ -860,22 +860,17 @@ function f-sjis {
     $env:LANG = "ja_JP.SJIS"
 }
 
-# ファイル名の一覧と抽出
-function f-find {
+# ファイル名の一覧とそこから抽出
+function f-find-grep {
     $pat, $rest = $args
     if ( $args.length -eq 0 ) {
+        # ファイル一覧表示
         get-childitem -recurse -exclude ".git/" | foreach-object { $_.FullName }
     }
     else {
+        # ファイル一覧からマッチするもののみ表示
         get-childitem -recurse -exclude ".git/" | foreach-object { $_.FullName } | foreach-object { write-output $_ | select-string -pattern $pat }
     }
-}
-
-# ファイルの内容で検索する
-function f-find-grep {
-    $pat, $rest = $args
-    $srcdir, $rest = $rest
-    get-childitem -recurse -exclude ".git/" $srcdir  | foreach-object { if ( ! $_.PSIsContainer ) { Write-Output $_.FullName } } | foreach-object { select-string -pattern $pat -path $_ }
 }
 
 # ファイルの内容で検索する
@@ -1731,6 +1726,283 @@ function f-disk-cache-clean {
         choco cache remove --expired
     }
 
+}
+
+
+
+#-------------------------------------------------------------------------------
+#
+# 引数に複数の文字列を取り、CUI画面上でメニューを表示。カーソル上下で選んでEnterで決定。
+#
+# 使用方法サンプル
+# $result = f-select-cursor-string @(
+#     "Development"
+#     "Staging"
+#     "Production"
+# )
+#
+# Write-Host
+# Write-Host "選択結果: $result"
+#
+function f-select-cursor-string {
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            Mandatory,
+            Position = 0,
+            ValueFromPipeline
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string[]] $Items,
+
+        [string] $Prompt = "項目を選択してください",
+
+        # メニューとして同時表示する最大行数
+        [ValidateRange(1, 100)]
+        [int] $MaxVisibleItems = 15
+    )
+
+    begin {
+        $allItems = [System.Collections.Generic.List[string]]::new()
+    }
+
+    process {
+        foreach ($item in $Items) {
+            $allItems.Add($item)
+        }
+    }
+
+    end {
+        if ($allItems.Count -eq 0) {
+            return $null
+        }
+
+        # ANSI / VT Escape
+        $ESC = [char]27
+
+        # ANSI sequences
+        $CursorUp = { param($n) "${ESC}[$($n)A" }
+        $ClearLine = "${ESC}[2K"
+        $Column1 = "${ESC}[1G"
+        $ReverseOn = "${ESC}[7m"
+        $ReverseOff = "${ESC}[27m"
+        $HideCursor = "${ESC}[?25l"
+        $ShowCursor = "${ESC}[?25h"
+
+        $selected = 0
+        $offset = 0
+
+        # 実際に表示する項目数
+        $visibleCount = [Math]::Min(
+            $MaxVisibleItems,
+            $allItems.Count
+        )
+
+        # Prompt + items + footer
+        $menuLineCount = $visibleCount + 2
+
+        $firstDraw = $true
+
+        try {
+            # カーソル非表示
+            [Console]::Write($HideCursor)
+
+            while ($true) {
+
+                #-----------------------------------------
+                # 2回目以降は前回表示した位置まで戻る
+                #-----------------------------------------
+                if (-not $firstDraw) {
+                    [Console]::Write(
+                        (& $CursorUp $menuLineCount)
+                    )
+                }
+
+                $firstDraw = $false
+
+                #-----------------------------------------
+                # Prompt
+                #-----------------------------------------
+                [Console]::Write($ClearLine)
+                [Console]::Write($Column1)
+                [Console]::WriteLine($Prompt)
+
+                #-----------------------------------------
+                # Items
+                #-----------------------------------------
+                for ($i = 0; $i -lt $visibleCount; $i++) {
+
+                    $index = $offset + $i
+
+                    [Console]::Write($ClearLine)
+                    [Console]::Write($Column1)
+
+                    if ($index -lt $allItems.Count) {
+
+                        $text = $allItems[$index]
+
+                        if ($index -eq $selected) {
+
+                            # 選択行を反転
+                            [Console]::Write($ReverseOn)
+                            [Console]::Write(" > $text ")
+                            [Console]::Write($ReverseOff)
+                        }
+                        else {
+                            [Console]::Write("   $text")
+                        }
+                    }
+
+                    [Console]::WriteLine()
+                }
+
+                #-----------------------------------------
+                # Footer
+                #-----------------------------------------
+                [Console]::Write($ClearLine)
+                [Console]::Write($Column1)
+
+                $position = $selected + 1
+                $total = $allItems.Count
+
+                [Console]::WriteLine(
+                    "↑/↓: 移動  Enter: 決定  Esc: キャンセル  [$position/$total]"
+                )
+
+                #-----------------------------------------
+                # Keyboard input
+                #-----------------------------------------
+                $key = [Console]::ReadKey($true)
+
+                switch ($key.Key) {
+
+                    'UpArrow' {
+
+                        if ($selected -gt 0) {
+                            $selected--
+
+                            if ($selected -lt $offset) {
+                                $offset = $selected
+                            }
+                        }
+                    }
+
+                    'DownArrow' {
+
+                        if ($selected -lt ($allItems.Count - 1)) {
+                            $selected++
+
+                            if ($selected -ge ($offset + $visibleCount)) {
+                                $offset = $selected - $visibleCount + 1
+                            }
+                        }
+                    }
+
+                    'Home' {
+
+                        $selected = 0
+                        $offset = 0
+                    }
+
+                    'End' {
+
+                        $selected = $allItems.Count - 1
+
+                        $offset = [Math]::Max(
+                            0,
+                            $allItems.Count - $visibleCount
+                        )
+                    }
+
+                    'PageUp' {
+
+                        $selected = [Math]::Max(
+                            0,
+                            $selected - $visibleCount
+                        )
+
+                        $offset = [Math]::Max(
+                            0,
+                            $offset - $visibleCount
+                        )
+                    }
+
+                    'PageDown' {
+
+                        $selected = [Math]::Min(
+                            $allItems.Count - 1,
+                            $selected + $visibleCount
+                        )
+
+                        $maxOffset = [Math]::Max(
+                            0,
+                            $allItems.Count - $visibleCount
+                        )
+
+                        $offset = [Math]::Min(
+                            $maxOffset,
+                            $offset + $visibleCount
+                        )
+                    }
+
+                    'Enter' {
+
+                        # メニュー表示を消す
+                        [Console]::Write(
+                            (& $CursorUp $menuLineCount)
+                        )
+
+                        for ($i = 0; $i -lt $menuLineCount; $i++) {
+                            [Console]::Write($ClearLine)
+                            [Console]::Write($Column1)
+
+                            if ($i -lt ($menuLineCount - 1)) {
+                                [Console]::WriteLine()
+                            }
+                        }
+
+                        [Console]::Write(
+                            (& $CursorUp ($menuLineCount - 1))
+                        )
+
+                        [Console]::Write($Column1)
+
+                        return $allItems[$selected]
+                    }
+
+                    'Escape' {
+
+                        # メニュー表示を消す
+                        [Console]::Write(
+                            (& $CursorUp $menuLineCount)
+                        )
+
+                        for ($i = 0; $i -lt $menuLineCount; $i++) {
+                            [Console]::Write($ClearLine)
+                            [Console]::Write($Column1)
+
+                            if ($i -lt ($menuLineCount - 1)) {
+                                [Console]::WriteLine()
+                            }
+                        }
+
+                        [Console]::Write(
+                            (& $CursorUp ($menuLineCount - 1))
+                        )
+
+                        [Console]::Write($Column1)
+
+                        return $null
+                    }
+                }
+            }
+        }
+        finally {
+            # 異常終了してもカーソルを必ず復元
+            [Console]::Write($ReverseOff)
+            [Console]::Write($ShowCursor)
+        }
+    }
 }
 
 
