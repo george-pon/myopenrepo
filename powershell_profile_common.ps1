@@ -1632,126 +1632,6 @@ if ( Test-Path "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1" ) {
     f-path-add "$env:PERSONAL_BASE_DIR\01-desktop-tools\rapture-2.4.1"
 }
 
-function f-sakura-grep() {
-    $searchStr, $args = $args
-    $ext = "*"
-    if ( $args.Length -gt 0 ) {
-        $ext, $args = $args
-    }
-    $dir = "."
-    sakura.exe -GREPMODE -GKEY="$searchStr" -GFILE="*.$ext" -GFOLDER="$dir" -GOPT="SP" -GCODE=99
-}
-
-
-# ファイル名の一覧とそこから抽出と選択とsakura起動
-function f-find-grep-select-sakura {
-
-    # ファイル名一覧取得
-    $filelist = @( )
-    $pat, $rest = $args
-    if ( $args.length -eq 0 ) {
-        # ファイル一覧表示
-        get-childitem -recurse -exclude ".git/" | foreach-object { $filelist += $_.FullName }
-    }
-    else {
-        # ファイル一覧からマッチするもののみ表示
-        get-childitem -recurse -exclude ".git/" | foreach-object { $_.FullName } | foreach-object { $filelist += ( $_ | select-string -pattern $pat ) }
-    }
-
-    # 選択
-    $select_file = f-select-cursor-string $filelist
-
-    # sakura起動
-    sakura.exe "$select_file"
-}
-
-
-function f-sakura-memo {
-    # 引数チェック
-    $NEW_SUFFIX = ""
-    while ( $args.Length -gt 0 ) {
-        $arg1, $args = $args
-        if ( $arg1 -eq "-n" ) {
-            $arg2, $args = $args
-            $NEW_SUFFIX = "_$arg2"
-        }
-    }
-    $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
-    sakura.exe "$NEW_MEMO_FILE"
-}
-
-function f-code-memo {
-    # 引数チェック
-    $NEW_SUFFIX = ""
-    while ( $args.Length -gt 0 ) {
-        $arg1, $args = $args
-        if ( $arg1 -eq "-n" ) {
-            $arg2, $args = $args
-            $NEW_SUFFIX = "_$arg2"
-        }
-    }
-    $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
-    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
-    code "$NEW_MEMO_FILE"
-}
-
-# listen port 表示
-function f-netstat-listen {
-    netstat -ant | Select-String -Pattern "TCP" | Select-String -Pattern "LISTENING"
-}
-
-#
-# nvm (node runtime version 切り替えツール関連)
-#
-
-# 現在の node version LTS
-$env:NVM_USE_VERSION = "24.11.1"
-
-# nvm インストール可能なversion一覧表示
-function f-nvm-list-available {
-    write-host ""
-    write-host ""
-    write-host "利用可能な node version"
-    nvm list available
-    write-host ""
-    write-host ""
-    write-host "インストール済み node version"
-    nvm list
-}
-
-
-function f-nvm-install {
-    nvm install $env:NVM_USE_VERSION
-}
-
-function f-nvm-use {
-    nvm use $env:NVM_USE_VERSION
-}
-
-# ディスクのお掃除を行う
-function f-disk-cache-clean {
-
-    # clean npm cache
-    if ( f-type-silent npm ) {
-        write-host "npm cache clean --force"
-        npm cache clean --force
-    }
-
-    # clean pip cache
-    if ( f-type-silent pip ) {
-        write-host "pip cache purge"
-        pip cache purge
-    }
-
-    # clean chocolatey cache
-    if ( f-type-silent choco ) {
-        write-host "choco cache remove --expired"
-        choco cache remove --expired
-    }
-
-}
-
 
 
 #-------------------------------------------------------------------------------
@@ -2027,6 +1907,183 @@ function f-select-cursor-string {
             [Console]::Write($ShowCursor)
         }
     }
+}
+
+
+#--------------------------------------------------------------------
+# エディタ簡易起動
+#
+#
+
+function f-sakura-grep() {
+    $searchStr, $args = $args
+    $ext = "*"
+    if ( $args.Length -gt 0 ) {
+        $ext, $args = $args
+    }
+    $dir = "."
+    sakura.exe -GREPMODE -GKEY="$searchStr" -GFILE="*.$ext" -GFOLDER="$dir" -GOPT="SP" -GCODE=99
+}
+
+
+# .git を除外して検索
+function f-get-childitemwithoutgit {
+    param(
+        [string]$Path = '.'
+    )
+
+    Get-ChildItem -LiteralPath $Path | ForEach-Object {
+        if ($_.PSIsContainer) {
+            if ($_.Name -ne '.git') {
+                $_
+                f-get-childitemwithoutgit -Path $_.FullName
+            }
+        }
+        else {
+            $_
+        }
+    }
+}
+
+# ファイル名一覧から選択してsakura起動
+function f-sakura-select {
+
+    # ファイル名一覧
+    $filelist = @( )
+
+    # 引数チェック
+    $NEW_MEMO_DATETIME = Get-Date -Format "yyyyMMdd_HHmmss"
+    $NEW_MEMO_FILE = $null
+    $NEW_SUFFIX = ""
+    $pat = $null
+    while ( $args.Length -gt 0 ) {
+        $arg1, $args = $args
+        if ( $arg1 -eq "-n" ) {
+            # ファイル名として採用
+            $arg2, $args = $args
+            # ファイル名のサフィックスとして使用
+            $NEW_SUFFIX = "_$arg2"
+        }
+        else {
+            # ファイル名検索パターンとして採用
+            $pat = $arg1
+        }
+    }
+
+    # -n オプションの指定を含めて、適当な新規ファイル名をリストの先頭に追加
+    $NEW_MEMO_FILE = "$pwd\${NEW_MEMO_DATETIME}${NEW_SUFFIX}.md"
+    # 新規ファイル名をリストに追加
+    $filelist += $NEW_MEMO_FILE
+
+    # 検索パターンの指定に従って、カレントディレクトリのファイル一覧をリストに追加
+    if ( $null -eq $pat ) {
+        # ファイル一覧をリストに追加
+        f-get-childitemwithoutgit | foreach-object { $filelist += $_.FullName }
+    }
+    else {
+        # ファイル名がパターンにマッチするもののみリストに追加
+        f-get-childitemwithoutgit | foreach-object { $_.FullName } | foreach-object { $filelist += ( $_ | select-string -pattern $pat ) }
+    }
+
+    # CUIでリストから選択
+    $select_file = f-select-cursor-string $filelist
+
+    # sakura起動
+    if ( $null -ne $select_file ) {
+        sakura.exe "$select_file"
+    }
+}
+
+
+function f-sakura-memo {
+    # 引数チェック
+    $NEW_SUFFIX = ""
+    while ( $args.Length -gt 0 ) {
+        $arg1, $args = $args
+        if ( $arg1 -eq "-n" ) {
+            $arg2, $args = $args
+            $NEW_SUFFIX = "_$arg2"
+        }
+    }
+    # 新規ファイル名作成
+    $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
+    sakura.exe "$NEW_MEMO_FILE"
+}
+
+function f-code-memo {
+    # 引数チェック
+    $NEW_SUFFIX = ""
+    while ( $args.Length -gt 0 ) {
+        $arg1, $args = $args
+        if ( $arg1 -eq "-n" ) {
+            $arg2, $args = $args
+            $NEW_SUFFIX = "_$arg2"
+        }
+    }
+    $NEW_MEMO_FILE = Get-Date -Format "yyyyMMdd_HHmmss"
+    $NEW_MEMO_FILE = "$env:PERSONAL_BASE_DIR\Memo_${NEW_MEMO_FILE}${NEW_SUFFIX}.md"
+    code "$NEW_MEMO_FILE"
+}
+
+#
+# その他のよく使う操作
+#
+
+# listen port 表示
+function f-netstat-listen {
+    netstat -ant | Select-String -Pattern "TCP" | Select-String -Pattern "LISTENING"
+}
+
+#
+# nvm (node runtime version 切り替えツール関連)
+#
+
+# 現在の node version LTS
+$env:NVM_USE_VERSION = "24.11.1"
+
+# nvm インストール可能なversion一覧表示
+function f-nvm-list-available {
+    write-host ""
+    write-host ""
+    write-host "利用可能な node version"
+    nvm list available
+    write-host ""
+    write-host ""
+    write-host "インストール済み node version"
+    nvm list
+}
+
+
+function f-nvm-install {
+    nvm install $env:NVM_USE_VERSION
+}
+
+function f-nvm-use {
+    nvm use $env:NVM_USE_VERSION
+}
+
+# ディスクのお掃除を行う
+function f-disk-cache-clean {
+
+    # clean npm cache
+    if ( f-type-silent npm ) {
+        write-host "npm cache clean --force"
+        npm cache clean --force
+    }
+
+    # clean pip cache
+    if ( f-type-silent pip ) {
+        write-host "pip cache purge"
+        pip cache purge
+    }
+
+    # clean chocolatey cache
+    if ( f-type-silent choco ) {
+        write-host "choco cache remove --expired"
+        choco cache remove --expired
+    }
+
 }
 
 
