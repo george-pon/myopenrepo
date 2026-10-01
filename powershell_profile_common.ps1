@@ -1642,6 +1642,30 @@ function f-sakura-grep() {
     sakura.exe -GREPMODE -GKEY="$searchStr" -GFILE="*.$ext" -GFOLDER="$dir" -GOPT="SP" -GCODE=99
 }
 
+
+# ファイル名の一覧とそこから抽出と選択とsakura起動
+function f-find-grep-select-sakura {
+
+    # ファイル名一覧取得
+    $filelist = @( )
+    $pat, $rest = $args
+    if ( $args.length -eq 0 ) {
+        # ファイル一覧表示
+        get-childitem -recurse -exclude ".git/" | foreach-object { $filelist += $_.FullName }
+    }
+    else {
+        # ファイル一覧からマッチするもののみ表示
+        get-childitem -recurse -exclude ".git/" | foreach-object { $_.FullName } | foreach-object { $filelist += ( $_ | select-string -pattern $pat ) }
+    }
+
+    # 選択
+    $select_file = f-select-cursor-string $filelist
+
+    # sakura起動
+    sakura.exe "$select_file"
+}
+
+
 function f-sakura-memo {
     # 引数チェック
     $NEW_SUFFIX = ""
