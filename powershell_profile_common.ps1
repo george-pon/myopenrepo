@@ -1988,9 +1988,14 @@ function f-sakura-select {
     # CUIでリストから選択
     $select_file = f-select-cursor-string $filelist
 
-    # sakura起動
+    # ファイルが選択された場合はプログラムから起動
     if ( $null -ne $select_file ) {
-        sakura.exe "$select_file"
+        if ( $select_file -like "*.xlsx" ) {
+            Start-Process "$select_file"
+        }
+        else {
+            sakura.exe "$select_file"
+        }
     }
 }
 
